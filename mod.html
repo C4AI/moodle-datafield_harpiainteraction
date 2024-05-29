@@ -1,0 +1,41 @@
+<?php
+
+
+    function fetch_providers() {
+        $url = 'http://172.17.0.1:42774/list';  // TODO: remove hard-coded URL
+    
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+        $response = curl_exec($ch);
+        if (curl_errno($ch)){
+             // ...
+        }
+        curl_close($ch);
+    
+        return json_decode($response);
+    }
+    $providers = fetch_providers()->providers;
+
+  /* The contents of this file are shown when the teacher is
+     creating or editing a field of the type implemented by this plug-in */
+?>
+
+<table width="100%" cellpadding="5">
+    <tr>
+        <td class="c0"><label for="name"><?php echo get_string('fieldname', 'data'); ?></label></td>
+        <td class="c1"><input class="fieldname" type="text" name="name" id="name" value="<?php p($this->field->name); ?>" /></td>
+    </tr>
+    <tr>
+        <td class="c0"><label for="description"><?php echo get_string('fielddescription', 'data'); ?></label></td>
+        <td class="c1"><input class="fielddescription" type="text" name="description" id="description" value="<?php p($this->field->description);?>" /></td>
+    </tr>
+    <tr>
+        <td class="c0"><label for="param1"><?php echo get_string('providername', 'datafield_harpiainteraction'); ?></label></td>
+        <td class="c1"><input list="answerproviders" class="provider-name-input" type="text" name="param1" id="provider-name-input" value="<?php p($this->field->param1 ?: ''); ?>" /></td>
+        <datalist id="answerproviders">
+            <?php foreach ($providers as $provider) echo '<option value="' . s($provider) . '" />'; ?>
+        </datalist>
+    </tr>
+</table>
