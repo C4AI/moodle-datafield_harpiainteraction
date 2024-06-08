@@ -30,7 +30,7 @@ class data_field_harpiainteraction extends data_field_base {
 
 
         global $DB, $OUTPUT, $PAGE;
-        $PAGE->requires->js('/data/field/harpiainteraction/assets/harpiainteraction.js');
+        $PAGE->requires->js('/mod/data/field/harpiainteraction/assets/harpiainteraction.js');
 
         if ($formdata) {
             $fieldname = 'field_' . $this->field->id . '_query';
