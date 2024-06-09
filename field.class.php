@@ -1,11 +1,24 @@
 <?php
 
+// Moodle stores the entries in the table `data_content`,
+// which has the columns `id` (id of the entry),
+// `fieldid` (id of the field in the `data_fields` table),
+// `recordid` (id of the record in the `data_records` table),
+// and the 5 free columns `content`, `content1`, ..., `content4`.
+// We use:
+// - `content` to store the query;
+// - `content1` to store the output.
+
+
+
+
+
 class data_field_harpiainteraction extends data_field_base {
 
     var $type = 'harpiainteraction';
 
-    var $query = "";
-    var $output = "";
+    var $query = null;
+    var $output = null;
 
     public function supports_preview(): bool {
         return true;
@@ -16,20 +29,22 @@ class data_field_harpiainteraction extends data_field_base {
             'id' => 0,
             'fieldid' => $this->field->id,
             'recordid' => $recordid,
-            'content' => $this->query,
-            'content1' => $this->output,
+            'content' => $this->query ?? '',
+            'content1' => $this->output ?? '',
             'content2' => null,
             'content3' => null,
             'content4' => null,
         ];
     }
 
-    /* Function that generates the HTML code shown when the student (evaluator)
-       is adding or editing an entry */
+    
     function display_add_field($recordid = 0, $formdata = null) {
-
+        // This function generates the item in the form shown when the student (evaluator)
+        // is adding or editing an entry
 
         global $DB, $OUTPUT, $PAGE;
+        
+        // Include the Javascript code that calls the server requesting the language model's output
         $PAGE->requires->js('/mod/data/field/harpiainteraction/assets/harpiainteraction.js');
 
         if ($formdata) {
@@ -43,10 +58,16 @@ class data_field_harpiainteraction extends data_field_base {
                 'output' => $output
             ];
         } else if ($recordid) {
-            $content = json_decode($DB->get_field('data_content', 'content', array('fieldid'=>$this->field->id, 'recordid'=>$recordid)));
-        } else {
+            // Editing an existing record
+            $where = array('fieldid'=>$this->field->id, 'recordid'=>$recordid);
             $content = [
-                'query' => '',
+                'query' => $DB->get_field('data_content', 'content', $where),
+                'output' => $DB->get_field('data_content', 'content1', $where),
+            ];
+        } else {
+            // Creating a new record
+            $content = [
+                'query' => '333',
                 'output' => ''
             ];
         }
@@ -124,10 +145,10 @@ class data_field_harpiainteraction extends data_field_base {
             '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
             '%{contexts_label}' => s(get_string('contexts', 'datafield_harpiainteraction')),
             '%{field_id}' => $this->field->id,
-            '%{query_value}' => s($content->query),
-            '%{output_value}' => s($content->output),
-            '%{send_display}' => $content->output ? 'none' : 'initial',
-            '%{query_attrs}' => $content->output ? 'readonly="readonly"' : '',
+            '%{query_value}' => s($content['query'] ?? 'NULL'),
+            '%{output_value}' => s($content['output'] ?? ''),
+            '%{send_display}' => $content['output'] ? 'none' : 'initial',
+            '%{query_attrs}' => $content['output'] ? 'readonly="readonly"' : '',
             '%{provider_hash}' => s($provider_hash),  # prevent users from guessing other providers
         ]);
     }
@@ -157,37 +178,47 @@ class data_field_harpiainteraction extends data_field_base {
     }
 
     function update_content($recordid, $value, $name='') {
-        global $DB;
+        
+        // This function is called
+        // once per form field (in our case, the form fields are query and output).        
 
-        $name_parts = explode('_', $name);
+        // Extract name of the HTML field
+        $name_parts = explode('_', $name);  
         $key = $name_parts[array_key_last($name_parts)];
-        if (! in_array($key, ['query', 'output']))
+        if (!in_array($key, ['query', 'output']))
             return;
-        $this->$key = $value;
+        $this->$key = $value ?? '';
 
-        if ($this->query and $this->output) {
+        if ($this->query !== null and $this->output !== null) {
+            // All values have been colected, so we store them in the DB
+
             $content = new stdClass();
             $content->fieldid = $this->field->id;
             $content->recordid = $recordid;
-            $content->content = json_encode([
-                'query' => $this->query,
-                'output' => $this->output
-            ]);
+            $content->content = $this->query;
+            $content->content1 = $this->output;
+
+            global $DB;
             if ($oldcontent = $DB->get_record('data_content', array('fieldid'=>$this->field->id, 'recordid'=>$recordid))) {
+                // Updating an existing entry
                 $content->id = $oldcontent->id;
                 return $DB->update_record('data_content', $content);
             } else {
+                // Creating a new entry
                 return $DB->insert_record('data_content', $content);
             }
         }
     }
 
     function display_browse_field($recordid, $template) {
+
+        // This function generates the summary of the data of this field,
+        // displayed on the entry list
+
         $content = $this->get_data_content($recordid);
         if (!$content || empty($content->content)) {
             return '';
         }
-        $data = json_decode($content->content);
         $str = <<<ENDSTR
             <u>Query:</u> <i>%{query}</i>
             <br>
@@ -195,8 +226,8 @@ class data_field_harpiainteraction extends data_field_base {
         ENDSTR;
         
         return strtr($str, [
-            '%{query}' => s($data->query),
-            '%{output}' => s($data->output),
+            '%{query}' => s($content->content),
+            '%{output}' => s($content->content1),
         ]);
     }
 
