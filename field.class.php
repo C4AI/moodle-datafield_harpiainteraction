@@ -7,7 +7,7 @@
 // and the 5 free columns `content`, `content1`, ..., `content4`.
 // We use:
 // - `content` to store the query;
-// - `content1` to store the output.
+// - `content1` to store the answer.
 
 
 
@@ -18,7 +18,7 @@ class data_field_harpiainteraction extends data_field_base {
     var $type = 'harpiainteraction';
 
     var $query = null;
-    var $output = null;
+    var $answer = null;
 
     public function supports_preview(): bool {
         return true;
@@ -30,7 +30,7 @@ class data_field_harpiainteraction extends data_field_base {
             'fieldid' => $this->field->id,
             'recordid' => $recordid,
             'content' => $this->query ?? '',
-            'content1' => $this->output ?? '',
+            'content1' => $this->answer ?? '',
             'content2' => null,
             'content3' => null,
             'content4' => null,
@@ -44,31 +44,31 @@ class data_field_harpiainteraction extends data_field_base {
 
         global $DB, $OUTPUT, $PAGE;
         
-        // Include the Javascript code that calls the server requesting the language model's output
+        // Include the Javascript code that calls the server requesting the language model's answer
         $PAGE->requires->js('/mod/data/field/harpiainteraction/assets/harpiainteraction.js');
 
         if ($formdata) {
             $fieldname = 'field_' . $this->field->id . '_query';
             $query   = $formdata->$fieldname;
-            $fieldname = 'field_' . $this->field->id . '_output';
-            $output   = $formdata->$fieldname;
+            $fieldname = 'field_' . $this->field->id . '_answer';
+            $answer   = $formdata->$fieldname;
 
             $content = [
                 'query' => $query,
-                'output' => $output
+                'answer' => $answer
             ];
         } else if ($recordid) {
             // Editing an existing record
             $where = array('fieldid'=>$this->field->id, 'recordid'=>$recordid);
             $content = [
                 'query' => $DB->get_field('data_content', 'content', $where),
-                'output' => $DB->get_field('data_content', 'content1', $where),
+                'answer' => $DB->get_field('data_content', 'content1', $where),
             ];
         } else {
             // Creating a new record
             $content = [
-                'query' => '333',
-                'output' => ''
+                'query' => '',
+                'answer' => ''
             ];
         }
 
@@ -103,8 +103,8 @@ class data_field_harpiainteraction extends data_field_base {
                                 <td colspan="2">
                                     <p class="lm-answer"
                                         style="font-style:italic; border:none; resize: none; width:100%; vertical-align:top; margin-left:1em;"
-                                    >%{output_value}</p>
-                                    <input type="hidden" name="field_%{field_id}_output" class="lm-answer-hidden" value="%{output_value}" />
+                                    >%{answer_value}</p>
+                                    <input type="hidden" name="field_%{field_id}_answer" class="lm-answer-hidden" value="%{answer_value}" />
                                 </td>
                             </tr>
                             <tr class="lm-contexts" style="display:none">
@@ -146,57 +146,93 @@ class data_field_harpiainteraction extends data_field_base {
             '%{contexts_label}' => s(get_string('contexts', 'datafield_harpiainteraction')),
             '%{field_id}' => $this->field->id,
             '%{query_value}' => s($content['query'] ?? 'NULL'),
-            '%{output_value}' => s($content['output'] ?? ''),
-            '%{send_display}' => $content['output'] ? 'none' : 'initial',
-            '%{query_attrs}' => $content['output'] ? 'readonly="readonly"' : '',
+            '%{answer_value}' => s($content['answer'] ?? ''),
+            '%{send_display}' => $content['answer'] ? 'none' : 'initial',
+            '%{query_attrs}' => $content['answer'] ? 'readonly="readonly"' : '',
             '%{provider_hash}' => s($provider_hash),  # prevent users from guessing other providers
         ]);
     }
 
 
-    /**
-     * Display the search field in advanced search page
-     * @param mixed $value
-     * @return string
-     * @throws coding_exception
-     */
-    public function display_search_field($value = null) {
-        $str = '';
-        // TODO: implement search
 
-        return $str;
+    public function display_search_field($value = null) {
+        // This function generates the search fields in the advanced search page
+        $str = <<<ENDSTR
+            <fieldset>
+                <legend>%{field_name}</legend>
+                <label for="f_%{field_id}_query">%{query_label}</label>
+                <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_query" value="%{query}" />
+                <label for="f_%{field_id}_answer">%{answer_label}</label>
+                <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_answer" value="%{answer}" />
+            </fieldset>
+        ENDSTR;
+        return strtr($str, [
+            '%{field_id}' => $this->field->id,
+            '%{field_name}' =>  s($this->field->name),
+            '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
+            '%{query}' => s($value['query'] ?? ''), 
+            '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
+            '%{answer}' => s($value['answer'] ?? ''), 
+        ]);
     }
 
     function generate_sql($tablealias, $value) {
-        // TODO: implement search
-        return array();
+        
+        // This function generates the SQL conditions in the search.
+
+        global $DB;
+
+        $query = $value['query'];
+        $answer = $value['answer'];
+
+        $conditions = [
+            "{$tablealias}.fieldid = {$this->field->id}",
+            $DB->sql_like("{$tablealias}.content", ":c1", false),
+            $DB->sql_like("{$tablealias}.content1", ":c2", false),
+        ];
+        return array(
+            '(' . implode(" AND ", $conditions) . ')',
+            array('c1' => "%$query%", 'c2' => "%$answer%")
+        );  
     }
 
     public function parse_search_field($defaults = null) {
-        // TODO: implement search
+        
+        // This function parses the user input in the advanced search.
+
+        $paramquery = 'f_' . $this->field->id . '_query';
+        $paramanswer = 'f_' . $this->field->id . '_answer';
+        $query = optional_param($paramquery, $defaults[$paramquery], PARAM_NOTAGS);
+        $answer = optional_param($paramanswer, $defaults[$paramanswer], PARAM_NOTAGS);
+        if ($query || $answer) {
+            return [
+                'query' => $query,
+                'answer' => $answer,
+            ];
+        }
         return 0;
     }
 
     function update_content($recordid, $value, $name='') {
         
         // This function is called
-        // once per form field (in our case, the form fields are query and output).        
+        // once per form field (in our case, the form fields are query and answer).        
 
         // Extract name of the HTML field
         $name_parts = explode('_', $name);  
         $key = $name_parts[array_key_last($name_parts)];
-        if (!in_array($key, ['query', 'output']))
+        if (!in_array($key, ['query', 'answer']))
             return;
         $this->$key = $value ?? '';
 
-        if ($this->query !== null and $this->output !== null) {
+        if ($this->query !== null and $this->answer !== null) {
             // All values have been colected, so we store them in the DB
 
             $content = new stdClass();
             $content->fieldid = $this->field->id;
             $content->recordid = $recordid;
             $content->content = $this->query;
-            $content->content1 = $this->output;
+            $content->content1 = $this->answer;
 
             global $DB;
             if ($oldcontent = $DB->get_record('data_content', array('fieldid'=>$this->field->id, 'recordid'=>$recordid))) {
@@ -220,14 +256,16 @@ class data_field_harpiainteraction extends data_field_base {
             return '';
         }
         $str = <<<ENDSTR
-            <u>Query:</u> <i>%{query}</i>
+            <u>%{query_label}</u> <i>%{query}</i>
             <br>
-            <u>Output:</u> <i>%{output}</i>
+            <u>%{answer_label}</u> <i>%{answer}</i>
         ENDSTR;
         
         return strtr($str, [
             '%{query}' => s($content->content),
-            '%{output}' => s($content->content1),
+            '%{answer}' => s($content->content1),
+            '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
+            '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
         ]);
     }
 
