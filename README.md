@@ -8,3 +8,11 @@ The main goal of this plugin is to implement an LLM evaluation system:
 - students (or invited evaluators) read the instructions,
     send a message to the language model and evaluate its output
     by filling in the fields set by teachers.
+
+The plugin can be used in any situation in which a number of students
+have to send a request to a language model and perform some actions
+based on its output.
+
+### Dependencies
+
+- HarpIA Ajax
