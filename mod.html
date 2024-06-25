@@ -1,22 +1,8 @@
 <?php
 
+require_once($CFG->dirroot . '/local/harpiaajax/send_message.php');
 
-    function fetch_providers() {
-        $url = 'http://172.17.0.1:42774/list';  // TODO: remove hard-coded URL
-    
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
-        $response = curl_exec($ch);
-        if (curl_errno($ch)){
-             // ...
-        }
-        curl_close($ch);
-    
-        return json_decode($response);
-    }
-    $providers = fetch_providers()->providers;
+$providers = send_message::fetch_providers()->providers;
 
   /* The contents of this file are shown when the teacher is
      creating or editing a field of the type implemented by this plug-in */
