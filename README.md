@@ -15,4 +15,5 @@ based on its output.
 
 ### Dependencies
 
-- HarpIA Ajax
+- Moodle &geq; 4.0.3;
+- [HarpIA Ajax](../../../moodle-local_harpiaajax) plugin.
