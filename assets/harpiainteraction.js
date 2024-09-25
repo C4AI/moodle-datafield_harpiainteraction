@@ -11,6 +11,7 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
       const fieldId = outer.getAttribute("data-field-id");
       const field = $(outer).find('.harpiainteraction-field')[0];
       const providerHash = $('input[name="field_' + fieldId + '_providerhash"]').val();
+      const history = JSON.parse($('input[name="field_' + fieldId + '_history"]').val());
       btn.hide();
       $(field).prop("readonly", true);
 
@@ -21,6 +22,7 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
             args: {
               query: field.value,
               provider_hash: providerHash,
+              history: history,
             },
           },
         ])[0]

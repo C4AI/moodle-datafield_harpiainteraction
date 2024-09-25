@@ -21,8 +21,13 @@ $string['pluginname'] = 'HarpIA Interaction';
 $string['fieldtypelabel'] = 'HarpIA - Interaction with Language Model';
 $string['query'] = 'Query:';
 $string['answer'] = 'Answer:';
+$string['history'] = 'History:';
+$string['continue'] = 'Continue conversation';
 $string['send'] = 'Send';
 $string['contexts'] = 'Contexts:';
 $string['providername'] = 'Answer provider';
+$string['usersender'] = 'User';
+$string['botsender'] = 'Model';
+$string['allowcontinue'] = 'Allow sequential conversation';
 
 $string['privacy:metadata'] = 'The HarpIA field component doesn\'t store any personal data; it uses tables defined in mod_data.';

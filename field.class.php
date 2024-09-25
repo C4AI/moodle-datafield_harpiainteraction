@@ -27,13 +27,18 @@
 // We use:
 // - `content` to store the query;
 // - `content1` to store the answer.
-
+// - `content2` to store the previous messages.
 
 
 
 class data_field_harpiainteraction extends data_field_base {
 
     var $type = 'harpiainteraction';
+
+    const colQuery = 'content';
+    const colAnswer = 'content1';
+    const colHistory = 'content2';
+
 
     var $query = null;
     var $answer = null;
@@ -47,9 +52,9 @@ class data_field_harpiainteraction extends data_field_base {
             'id' => 0,
             'fieldid' => $this->field->id,
             'recordid' => $recordid,
-            'content' => $this->query ?? '',
-            'content1' => $this->answer ?? '',
-            'content2' => null,
+            self::colQuery => $this->query ?? '',
+            self::colAnswer => $this->answer ?? '',
+            self::colHistory => $this->history ?? [],
             'content3' => null,
             'content4' => null,
         ];
@@ -70,8 +75,11 @@ class data_field_harpiainteraction extends data_field_base {
             $query   = $formdata->$fieldname;
             $fieldname = 'field_' . $this->field->id . '_answer';
             $answer   = $formdata->$fieldname;
+            $fieldname = 'field_' . $this->field->id . '_history';
+            $history   = json_decode($formdata->$fieldname ?? '[]');
 
             $content = [
+                'history' => $history,
                 'query' => $query,
                 'answer' => $answer
             ];
@@ -79,24 +87,53 @@ class data_field_harpiainteraction extends data_field_base {
             // Editing an existing record
             $where = array('fieldid'=>$this->field->id, 'recordid'=>$recordid);
             $content = [
-                'query' => $DB->get_field('data_content', 'content', $where),
-                'answer' => $DB->get_field('data_content', 'content1', $where),
+                'history' => json_decode($DB->get_field('data_content', self::colHistory, $where) ?: '[]'),
+                'query' => $DB->get_field('data_content', self::colQuery, $where),
+                'answer' => $DB->get_field('data_content', self::colAnswer, $where),
             ];
         } else {
             // Creating a new record
+            $history = [];
+            $parent_rid = $_GET['parentrid'];
+            if ($parent_rid) {
+                $where = array('fieldid'=>$this->field->id, 'recordid'=>$parent_rid);
+                $history = array_merge(json_decode($DB->get_field('data_content', self::colHistory, $where) ?: '[]'), [
+                    $DB->get_field('data_content', self::colQuery, $where),
+                    $DB->get_field('data_content', self::colAnswer, $where),
+                ]);
+            }
             $content = [
+                'history' => $history,
                 'query' => '',
                 'answer' => ''
             ];
         }
 
         $provider_hash = password_hash($this->field->param1, PASSWORD_DEFAULT);
-
+        
+        $history_html = '<input type="hidden" name="field_%{field_id}_history" value="' . s(json_encode($content['history'])) . '" />';
+        if ($content['history']) {
+            $fromUser = true;
+            $parts = ['<tr><td style="vertical-align: top;">%{history_label}</td><td><table border="1">'];
+            foreach ($content['history'] as $msg) {
+                $parts[] = '<tr><th>' .
+                    ($fromUser ? '%{user_label}' : '%{bot_label}') .
+                    '</th><td>' . s($msg) . '</td></tr>';
+                    $fromUser = !$fromUser;
+            }
+            $parts[] = '</table></td></tr>';
+            $history_html .= '<tr><td colspan="2">' . implode('', $parts) . '</td></tr>';
+        }
+        
+        
+        
+        
         $str = <<<ENDSTR
             <div title="%{description_label}" class="mod-data-input form-inline" data-field-id="%{field_id}">
                 <div style="width:100%;">
                     <table data-field-id="%{field_id}" style="width:100%;">
                         <tbody>
+                            $history_html
                             <tr>
                                 <td>
                                     <label for="field_%{field_id}_query">%{query_label}&nbsp;&nbsp;</label>
@@ -162,12 +199,15 @@ class data_field_harpiainteraction extends data_field_base {
             '%{send_btn}' => s(get_string('send', 'datafield_harpiainteraction')),
             '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
             '%{contexts_label}' => s(get_string('contexts', 'datafield_harpiainteraction')),
+            '%{history_label}' => s(get_string('history', 'datafield_harpiainteraction')),
             '%{field_id}' => $this->field->id,
             '%{query_value}' => s($content['query'] ?? 'NULL'),
             '%{answer_value}' => s($content['answer'] ?? ''),
             '%{send_display}' => $content['answer'] ? 'none' : 'initial',
             '%{query_attrs}' => $content['answer'] ? 'readonly="readonly"' : '',
             '%{provider_hash}' => s($provider_hash),  # prevent users from guessing other providers
+            '%{user_label}' => s(get_string('usersender', 'datafield_harpiainteraction')),
+            '%{bot_label}' => s(get_string('botsender', 'datafield_harpiainteraction')),
         ]);
     }
 
@@ -182,6 +222,8 @@ class data_field_harpiainteraction extends data_field_base {
                 <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_query" value="%{query}" />
                 <label for="f_%{field_id}_answer">%{answer_label}</label>
                 <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_answer" value="%{answer}" />
+                <label for="f_%{field_id}_history">%{history_label}</label>
+                <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_history" value="%{history}" />
             </fieldset>
         ENDSTR;
         return strtr($str, [
@@ -190,7 +232,9 @@ class data_field_harpiainteraction extends data_field_base {
             '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
             '%{query}' => s($value['query'] ?? ''), 
             '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
-            '%{answer}' => s($value['answer'] ?? ''), 
+            '%{answer}' => s($value['answer'] ?? ''),
+            '%{history_label}' => s(get_string('history', 'datafield_harpiainteraction')),
+            '%{history}' => s($value['history'] ?? ''), 
         ]);
     }
 
@@ -202,15 +246,20 @@ class data_field_harpiainteraction extends data_field_base {
 
         $query = $value['query'];
         $answer = $value['answer'];
-
+        $history = $value['history'];
+        
+        $colQuery = self::colQuery;
+        $colAnswer = self::colAnswer;
+        $colHistory = self::colHistory;
         $conditions = [
             "{$tablealias}.fieldid = {$this->field->id}",
-            $DB->sql_like("{$tablealias}.content", ":c1", false),
-            $DB->sql_like("{$tablealias}.content1", ":c2", false),
+            $DB->sql_like("{$tablealias}.{$colQuery}", ":c1", false),
+            $DB->sql_like("{$tablealias}.{$colAnswer}", ":c2", false),
+            $DB->sql_like("{$tablealias}.{$colHistory}", ":c3", false),
         ];
         return array(
             '(' . implode(" AND ", $conditions) . ')',
-            array('c1' => "%$query%", 'c2' => "%$answer%")
+            array('c1' => "%$query%", 'c2' => "%$answer%", 'c3' => "%$history%")
         );  
     }
 
@@ -220,12 +269,15 @@ class data_field_harpiainteraction extends data_field_base {
 
         $paramquery = 'f_' . $this->field->id . '_query';
         $paramanswer = 'f_' . $this->field->id . '_answer';
+        $paramhistory = 'f_' . $this->field->id . '_history';
         $query = optional_param($paramquery, $defaults[$paramquery], PARAM_NOTAGS);
         $answer = optional_param($paramanswer, $defaults[$paramanswer], PARAM_NOTAGS);
-        if ($query || $answer) {
+        $history = optional_param($paramhistory, $defaults[$paramhistory], PARAM_NOTAGS);
+        if ($query || $answer || $history) {
             return [
                 'query' => $query,
                 'answer' => $answer,
+                'history' => $history,
             ];
         }
         return 0;
@@ -234,26 +286,31 @@ class data_field_harpiainteraction extends data_field_base {
     function update_content($recordid, $value, $name='') {
         
         // This function is called
-        // once per form field (in our case, the form fields are query and answer).        
+        // once per FORM FIELD (in our case, the form fields are query, answer and history).        
 
         // Extract name of the HTML field
         $name_parts = explode('_', $name);  
         $key = $name_parts[array_key_last($name_parts)];
-        if (!in_array($key, ['query', 'answer']))
+        if (!in_array($key, ['query', 'answer', 'history']))
             return;
-        $this->$key = $value ?? '';
+        if ($key === 'history')
+            $this->$key = json_decode($value ?: '[]') ?? [];
+        else
+            $this->$key = $value ?? '';
+        
 
-        if ($this->query !== null and $this->answer !== null) {
+        if ($this->query !== null and $this->answer !== null and $this->history !== null) {
             // All values have been colected, so we store them in the DB
 
             $content = new stdClass();
             $content->fieldid = $this->field->id;
             $content->recordid = $recordid;
-            $content->content = $this->query;
-            $content->content1 = $this->answer;
+            $content->{self::colQuery} = $this->query;
+            $content->{self::colAnswer} = $this->answer;
+            $content->{self::colHistory} = json_encode($this->history ?: []);
 
             global $DB;
-            if ($oldcontent = $DB->get_record('data_content', array('fieldid'=>$this->field->id, 'recordid'=>$recordid))) {
+            if ($oldcontent = $DB->get_record('data_content', array('fieldid' => $this->field->id, 'recordid' => $recordid))) {
                 // Updating an existing entry
                 $content->id = $oldcontent->id;
                 return $DB->update_record('data_content', $content);
@@ -270,22 +327,47 @@ class data_field_harpiainteraction extends data_field_base {
         // displayed on the entry list
 
         $content = $this->get_data_content($recordid);
-        if (!$content || empty($content->content)) {
+        if (!$content || empty($content->{self::colQuery})) {
             return '';
         }
-        $str = <<<ENDSTR
+        $history_html = '';
+        $history = json_decode($content->{self::colHistory} ?: '[]');
+        if ($history) {
+            $fromUser = true;
+            $parts = ['<details><summary>%{history_label}</summary><table border="1">'];
+            foreach ($history as $msg) {
+                $parts[] = '<tr><th>' .
+                    ($fromUser ? '%{user_label}' : '%{bot_label}') .
+                    '</th><td>' . s($msg) . '</td></tr>';
+                $fromUser = !$fromUser;
+            }
+            $parts[] = '</table></details><br>';
+            $history_html .= implode('', $parts); 
+        }
+        
+
+        $str = $history_html . <<<ENDSTR
             <u>%{query_label}</u> <i>%{query}</i>
             <br>
             <u>%{answer_label}</u> <i>%{answer}</i>
+            <br>
         ENDSTR;
+
+        if ($this->field->param2 == 'on')
+            $str .= '<br><a href="' . (new moodle_url('/mod/data/edit.php', ['d' => $this->data->id, 'parentrid' => $recordid]))->out() . '">%{continue_label}</a>' ;
         
         return strtr($str, [
-            '%{query}' => s($content->content),
-            '%{answer}' => s($content->content1),
+            '%{query}' => s($content->{self::colQuery}),
+            '%{answer}' => s($content->{self::colAnswer}),
             '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
             '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
+            '%{history_label}' => s(get_string('history', 'datafield_harpiainteraction')),
+            '%{continue_label}' => s(get_string('continue', 'datafield_harpiainteraction')),
+            '%{user_label}' => s(get_string('usersender', 'datafield_harpiainteraction')),
+            '%{bot_label}' => s(get_string('botsender', 'datafield_harpiainteraction')),
         ]);
     }
+    
 
     public function get_config_for_external() {
         $configs = [];

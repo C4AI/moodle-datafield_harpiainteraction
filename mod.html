@@ -24,4 +24,8 @@ $providers = send_message::fetch_providers()->providers;
             <?php foreach ($providers as $provider) echo '<option value="' . s($provider) . '" />'; ?>
         </datalist>
     </tr>
+    <tr>
+        <td class="c0"><label for="allowcontinue"><?php echo get_string('allowcontinue', 'datafield_harpiainteraction'); ?></label></td>
+        <td class="c1"><input class="fieldname" type="checkbox" name="param2" id="allowcontinue" <?php if ($this->field->param2 == 'on') p('checked'); ?> /></td>
+    </tr>
 </table>
