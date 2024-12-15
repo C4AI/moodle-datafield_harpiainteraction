@@ -20,6 +20,7 @@
  * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace datafield_date\privacy;
 use core_privacy\local\request\transform;
 use core_privacy\local\request\writer;
@@ -32,15 +33,18 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements \core_privacy\local\metadata\null_provider,
-        datafield_provider {
+class provider implements
+    \core_privacy\local\metadata\null_provider,
+    datafield_provider
+{
     /**
      * Get the language string identifier with the component's language
      * file to explain why this plugin stores no data.
      *
      * @return  string
      */
-    public static function get_reason() : string {
+    public static function get_reason(): string
+    {
         return 'privacy:metadata';
     }
 
@@ -53,7 +57,8 @@ class provider implements \core_privacy\local\metadata\null_provider,
      * @param \stdClass $contentobj record from DB table {data_content}
      * @param \stdClass $defaultvalue pre-populated default value that most of plugins will use
      */
-    public static function export_data_content($context, $recordobj, $fieldobj, $contentobj, $defaultvalue) {
+    public static function export_data_content($context, $recordobj, $fieldobj, $contentobj, $defaultvalue)
+    {
         $defaultvalue->content = transform::date($defaultvalue->content);
         writer::with_context($context)->export_data([$recordobj->id, $contentobj->id], $defaultvalue);
     }
@@ -66,7 +71,8 @@ class provider implements \core_privacy\local\metadata\null_provider,
      * @param \stdClass $fieldobj record from DB table {data_fields}
      * @param \stdClass $contentobj record from DB table {data_content}
      */
-    public static function delete_data_content($context, $recordobj, $fieldobj, $contentobj) {
+    public static function delete_data_content($context, $recordobj, $fieldobj, $contentobj)
+    {
 
     }
 }

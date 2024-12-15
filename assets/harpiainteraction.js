@@ -23,6 +23,7 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
               query: field.value,
               provider_hash: providerHash,
               history: history,
+              harpia_data_field_id: fieldId,
             },
           },
         ])[0]

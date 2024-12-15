@@ -21,11 +21,15 @@ $providers = send_message::fetch_providers()->providers;
         <td class="c0"><label for="param1"><?php echo get_string('providername', 'datafield_harpiainteraction'); ?></label></td>
         <td class="c1"><input list="answerproviders" class="provider-name-input" type="text" name="param1" id="provider-name-input" value="<?php p($this->field->param1 ?: ''); ?>" /></td>
         <datalist id="answerproviders">
-            <?php foreach ($providers as $provider) echo '<option value="' . s($provider) . '" />'; ?>
+            <?php foreach ($providers as $provider) echo '<option value="' . s($provider->name) . '" />'; ?>
         </datalist>
     </tr>
     <tr>
         <td class="c0"><label for="allowcontinue"><?php echo get_string('allowcontinue', 'datafield_harpiainteraction'); ?></label></td>
         <td class="c1"><input class="fieldname" type="checkbox" name="param2" id="allowcontinue" <?php if ($this->field->param2 == 'on') p('checked'); ?> /></td>
+    </tr>
+    <tr>
+        <td class="c0"><label for="system-prompt-input"><?php echo get_string('systemprompt', 'datafield_harpiainteraction'); ?></label></td>
+        <td class="c1"><textarea class="fieldname" name="param3" id="system-prompt-input"><?php p($this->field->param3 ?: ''); ?></textarea></td>
     </tr>
 </table>
