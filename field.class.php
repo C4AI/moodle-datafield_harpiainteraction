@@ -43,7 +43,7 @@ class data_field_harpiainteraction extends data_field_base
 
     // data fields
     const colProviderHash = 'param1';
-    const colAllowContinue = 'param2';
+    const colExperimentType = 'param2';
     const colSystemPrompt = 'param3';
 
 
@@ -368,7 +368,7 @@ class data_field_harpiainteraction extends data_field_base
             <br>
         ENDSTR;
 
-        if ($this->field->{self::colAllowContinue} == 'on')
+        if ($this->field->{self::colExperimentType} == 'chat')
             $str .= '<br><a href="' . (new moodle_url('/mod/data/edit.php', [
                 'd' => $this->data->id,
                 'parentrid' => $recordid

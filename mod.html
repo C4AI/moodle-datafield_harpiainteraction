@@ -20,10 +20,18 @@ $providers = send_message::fetch_providers()->providers;
     <tr>
         <td class="c0"><label for="provider-name-input"><?php p(get_string('providername', 'datafield_harpiainteraction')); ?></label></td>
         <td class="c1">
-            <select id="answerproviders"  name="param1" id="provider-name-input" >
-                <?php foreach ($providers as $provider) {
-                    $checked = $this->field->param1 === $provider->name ? ' selected="selected"' : '';
-                    echo '<option value="' . s($provider->name) . '" ' . $checked . '>' . s($provider->name) . '</option>';
+            <select id="answerproviders"  name="param1" id="provider-name-input" onchange="document.getElementById('system-prompt-input').setAttribute('placeholder', this.children[this.selectedIndex].getAttribute('data-default-system-prompt'))">
+                <?php
+                    $prompt_placeholder = '';
+                    foreach ($providers as $provider) {
+                        $checked = '';
+                        if ($this->field->param1 === $provider->name) {
+                            $checked = ' selected="selected"';
+                            $prompt_placeholder = $provider->default_system_prompt;
+                        }
+                        echo '<option value="' . s($provider->name) . '" ' . $checked .
+                            ' data-default-system-prompt="' . s($provider->default_system_prompt) . '"' .
+                            '>' . s($provider->name) . '</option>';
                 }
                 ?>
             </select>
@@ -41,6 +49,6 @@ $providers = send_message::fetch_providers()->providers;
     </tr>
     <tr>
         <td class="c0"><label for="system-prompt-input"><?php echo get_string('systemprompt', 'datafield_harpiainteraction'); ?></label></td>
-        <td class="c1"><textarea class="fieldname" name="param3" id="system-prompt-input"><?php p($this->field->param3 ?: ''); ?></textarea></td>
+        <td class="c1"><textarea class="fieldname" name="param3" id="system-prompt-input" placeholder="<?php p($prompt_placeholder); ?>"><?php p($this->field->param3 ?: ''); ?></textarea></td>
     </tr>
 </table>
