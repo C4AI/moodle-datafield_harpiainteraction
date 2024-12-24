@@ -10,23 +10,34 @@ $providers = send_message::fetch_providers()->providers;
 
 <table width="100%" cellpadding="5">
     <tr>
-        <td class="c0"><label for="name"><?php echo get_string('fieldname', 'data'); ?></label></td>
+        <td class="c0"><label for="name"><?php p(get_string('fieldname', 'data')); ?></label></td>
         <td class="c1"><input class="fieldname" type="text" name="name" id="name" value="<?php p($this->field->name); ?>" /></td>
     </tr>
     <tr>
-        <td class="c0"><label for="description"><?php echo get_string('fielddescription', 'data'); ?></label></td>
+        <td class="c0"><label for="description"><?php p(get_string('fielddescription', 'data')); ?></label></td>
         <td class="c1"><input class="fielddescription" type="text" name="description" id="description" value="<?php p($this->field->description);?>" /></td>
     </tr>
     <tr>
-        <td class="c0"><label for="param1"><?php echo get_string('providername', 'datafield_harpiainteraction'); ?></label></td>
-        <td class="c1"><input list="answerproviders" class="provider-name-input" type="text" name="param1" id="provider-name-input" value="<?php p($this->field->param1 ?: ''); ?>" /></td>
-        <datalist id="answerproviders">
-            <?php foreach ($providers as $provider) echo '<option value="' . s($provider->name) . '" />'; ?>
-        </datalist>
+        <td class="c0"><label for="provider-name-input"><?php p(get_string('providername', 'datafield_harpiainteraction')); ?></label></td>
+        <td class="c1">
+            <select id="answerproviders"  name="param1" id="provider-name-input" >
+                <?php foreach ($providers as $provider) {
+                    $checked = $this->field->param1 === $provider->name ? ' selected="selected"' : '';
+                    echo '<option value="' . s($provider->name) . '" ' . $checked . '>' . s($provider->name) . '</option>';
+                }
+                ?>
+            </select>
+        </td>
+        
     </tr>
     <tr>
-        <td class="c0"><label for="allowcontinue"><?php echo get_string('allowcontinue', 'datafield_harpiainteraction'); ?></label></td>
-        <td class="c1"><input class="fieldname" type="checkbox" name="param2" id="allowcontinue" <?php if ($this->field->param2 == 'on') p('checked'); ?> /></td>
+        <td class="c0"><label for="experimenttype"><?php p(get_string('experimenttype', 'datafield_harpiainteraction')); ?></label></td>
+        <td class="c1">
+            <select class="fieldname" name="param2" id="experimenttype">
+                <option value="single" <?php if ($this->field->param2 == 'single') echo 'selected="selected"'; ?>> <?php p(get_string('experimenttype_single', 'datafield_harpiainteraction')); ?> </option>
+                <option value="chat" <?php if ($this->field->param2 == 'chat') echo 'selected="selected"'; ?>>  <?php p(get_string('experimenttype_chat', 'datafield_harpiainteraction')); ?> </option>
+            </select>
+        </td>
     </tr>
     <tr>
         <td class="c0"><label for="system-prompt-input"><?php echo get_string('systemprompt', 'datafield_harpiainteraction'); ?></label></td>
