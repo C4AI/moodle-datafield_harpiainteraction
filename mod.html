@@ -20,17 +20,20 @@ $providers = send_message::fetch_providers()->providers;
     <tr>
         <td class="c0"><label for="provider-name-input"><?php p(get_string('providername', 'datafield_harpiainteraction')); ?></label></td>
         <td class="c1">
-            <select id="answerproviders"  name="param1" id="provider-name-input" onchange="document.getElementById('system-prompt-input').setAttribute('placeholder', this.children[this.selectedIndex].getAttribute('data-default-system-prompt'))">
+            <select id="answerproviders"  name="param1" id="provider-name-input" onchange="document.getElementById('system-prompt-input').setAttribute('placeholder', this.children[this.selectedIndex].getAttribute('data-default-system-prompt')); document.getElementById('system-prompt-row').classList[parseInt(this.children[this.selectedIndex].getAttribute('data-supports-system-prompt')) ? 'remove' : 'add']('hidden')">
                 <?php
                     $prompt_placeholder = '';
+                    $hide_prompt = false;
                     foreach ($providers as $provider) {
                         $checked = '';
                         if ($this->field->param1 === $provider->name) {
                             $checked = ' selected="selected"';
                             $prompt_placeholder = $provider->default_system_prompt;
+                            $hide_prompt = !$provider->supports_system_prompt;
                         }
                         echo '<option value="' . s($provider->name) . '" ' . $checked .
                             ' data-default-system-prompt="' . s($provider->default_system_prompt) . '"' .
+                            ' data-supports-system-prompt="' . +$provider->supports_system_prompt  . '"' .
                             '>' . s($provider->name) . '</option>';
                 }
                 ?>
@@ -47,8 +50,8 @@ $providers = send_message::fetch_providers()->providers;
             </select>
         </td>
     </tr>
-    <tr>
+    <tr id="system-prompt-row" <?php if ($hide_prompt) echo ' class="hidden"'; ?>>
         <td class="c0"><label for="system-prompt-input"><?php echo get_string('systemprompt', 'datafield_harpiainteraction'); ?></label></td>
-        <td class="c1"><textarea class="fieldname" name="param3" id="system-prompt-input" placeholder="<?php p($prompt_placeholder); ?>"><?php p($this->field->param3 ?: ''); ?></textarea></td>
+        <td class="c1"><textarea class="fieldname" name="param3" id="system-prompt-input" placeholder="<?php p($prompt_placeholder); ?>" ><?php p($this->field->param3 ?: ''); ?></textarea></td>
     </tr>
 </table>
