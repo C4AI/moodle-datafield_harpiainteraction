@@ -386,6 +386,20 @@ class data_field_harpiainteraction extends data_field_base
         ]);
     }
 
+    function export_text_value($record)
+    {
+        // This function generates the string representation for the exported
+        // spreadsheet.
+        return json_encode(
+            [
+                "query" => $record->{self::colQuery},
+                "output" => $record->{self::colAnswer},
+                "history" => json_decode($record->{self::colHistory} ?? "[]"),
+            ],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
+
 
     public function get_config_for_external()
     {
