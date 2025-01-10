@@ -396,7 +396,7 @@ class data_field_harpiainteraction extends data_field_base
                 "output" => $record->{self::colAnswer},
                 "history" => json_decode($record->{self::colHistory} ?? "[]"),
             ],
-            JSON_UNESCAPED_UNICODE
+            JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT
         );
     }
 
