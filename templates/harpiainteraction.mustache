@@ -54,8 +54,10 @@
             <label for="provider-name-input">{{#str}}providername, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <select class="form-control" id="answerproviders" name="param1" id="provider-name-input" data-initial-value="{{param1}}">
-                <option value="" id="answerproviders-nooption"></option>
+            
+            {{#providers.0}}
+                <select class="form-control" name="param1" id="provider-name-input" data-initial-value="{{param1}}">
+                <option value="" id="provider-name-nooption"></option>
                 {{#providers}}
                     <option value="{{name}}" data-initial-value="{{param1}}"
                         data-default-system-prompt="{{default_system_prompt}}"
@@ -63,18 +65,26 @@
                         {{name}}
                     </option>
                 {{/providers}}
-            </select>
+                </select>
+            {{/providers.0}}
+            
+            {{^providers}}
+                <input class="form-control"  name="param1" id="provider-name-input" type="text" readonly value="{{param1}}">
+                <div class="errorbox alert alert-danger">
+                  {{#str}}cantfetchproviders, datafield_harpiainteraction{{/str}}
+                </div>
+            {{/providers}}
         </div>
     </div>
 
     <!-- Experiment type -->
     <div class="form-group row fitem">
         <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
-            <label for="experimenttype">{{#str}}experimenttype, datafield_harpiainteraction{{/str}}</label>
+            <label for="experiment-type-input">{{#str}}experimenttype, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <select class="form-control" name="param2" id="experimenttype" data-initial-value="{{param2}}">
-                <option value="" id="experimenttype-nooption"></option>
+            <select class="form-control" name="param2" id="experiment-type-input" data-initial-value="{{param2}}">
+                <option value="" id="experiment-type-nooption"></option>
                 <option value="single">{{#str}}experimenttype_single, datafield_harpiainteraction{{/str}}</option>
                 <option value="chat">{{#str}}experimenttype_chat, datafield_harpiainteraction{{/str}}</option>
             </select>
@@ -94,38 +104,45 @@
 
 </fieldset>
 {{#js}}
-    const answerProviders = document.getElementById('answerproviders');
+    const answerProviders = document.getElementById('provider-name-input');
     const systemPromptInput = document.getElementById('system-prompt-input');
     const systemPromptRow = document.getElementById('system-prompt-row');
-    const expTypeSelect = document.getElementById('experimenttype');
+    const expTypeSelect = document.getElementById('experiment-type-input');
 
-    answerProviders.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        systemPromptInput.setAttribute('placeholder', selectedOption.getAttribute('data-default-system-prompt'));
-        const supportsPrompt = Boolean(parseInt(selectedOption.getAttribute('data-supports-system-prompt')));
-        systemPromptRow.classList[supportsPrompt ? 'remove' : 'add']('hidden');
-        if (!supportsPrompt) {
-            // System prompt not supported: hide field, clear it, but preserve its value
-            // (if the user submits the form with a provider that does not support
-            //  system prompts, the value will be empty; but if the user changes
-            //  back to a model that supports system prompts before submitting,
-            //  the value will be restored)
-            systemPromptRow.classList.add('hidden');
-            if (systemPromptInput.value)
-                systemPromptInput.setAttribute('data-saved-value', systemPromptInput.value);
-            systemPromptInput.value = '';
-        } else {
-            // System prompt supported: show field and restore value (if any)
-            systemPromptInput.value = systemPromptInput.getAttribute('data-saved-value') || '';
-            systemPromptRow.classList.remove('hidden');
-        }
-    });
-    
+    if (answerProviders.tagName.toLowerCase() == "select") {
+        answerProviders.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            let supportsPrompt = true;
+            if (selectedOption) {
+                systemPromptInput.setAttribute('placeholder', selectedOption.getAttribute('data-default-system-prompt'));
+                supportsPrompt = Boolean(parseInt(selectedOption.getAttribute('data-supports-system-prompt')));
+            }
+            systemPromptRow.classList[supportsPrompt ? 'remove' : 'add']('hidden');
+            if (!supportsPrompt) {
+                // System prompt not supported: hide field, clear it, but preserve its value
+                // (if the user submits the form with a provider that does not support
+                //  system prompts, the value will be empty; but if the user changes
+                //  back to a model that supports system prompts before submitting,
+                //  the value will be restored)
+                systemPromptRow.classList.add('hidden');
+                if (systemPromptInput.value)
+                    systemPromptInput.setAttribute('data-saved-value', systemPromptInput.value);
+                systemPromptInput.value = '';
+            } else {
+                // System prompt supported: show field and restore value (if any)
+                const prevValue = systemPromptInput.getAttribute('data-saved-value') || '';
+                if (prevValue)
+                    systemPromptInput.value = systemPromptInput.getAttribute('data-saved-value') || '';
+                systemPromptRow.classList.remove('hidden');
+            }
+        });
+        answerProviders.value = answerProviders.getAttribute("data-initial-value");
+        answerProviders.dispatchEvent(new Event("change"));
+        document.getElementById("provider-name-nooption").remove();
+    }
     
     expTypeSelect.value = expTypeSelect.getAttribute("data-initial-value");
-    document.getElementById("experimenttype-nooption").remove();
+    document.getElementById("experiment-type-nooption").remove();
 
-    answerProviders.value = answerProviders.getAttribute("data-initial-value");
-    answerProviders.dispatchEvent(new Event("change"));
-    document.getElementById("answerproviders-nooption").remove();
+    
 {{/js}}
