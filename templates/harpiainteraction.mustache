@@ -32,8 +32,6 @@
     * param1 string The selected answer provider's name.
     * param2 string The selected experiment type ("single" or "chat").
     * param3 string The system prompt.
-    * prompt_placeholder string The default system prompt for the selected provider.
-    * hide_prompt bool Whether the prompt field should start hidden.
 
     Example context (json):
     {
@@ -43,8 +41,6 @@
         "param1": "a model name",
         "param2": "single",
         "param3": "You are an assistant. Answer concisely.",
-        "prompt_placeholder": "You are an assistant.",
-        "hide_prompt": false
     }
 }}
 
@@ -58,9 +54,10 @@
             <label for="provider-name-input">{{#str}}providername, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <select class="form-control" id="answerproviders" name="param1" id="provider-name-input" >
+            <select class="form-control" id="answerproviders" name="param1" id="provider-name-input" data-initial-value="{{param1}}">
+                <option value="" id="answerproviders-nooption"></option>
                 {{#providers}}
-                    <option value="{{name}}" {{#selected}}selected="selected"{{/selected}}
+                    <option value="{{name}}" data-initial-value="{{param1}}"
                         data-default-system-prompt="{{default_system_prompt}}"
                         data-supports-system-prompt="{{supports_system_prompt}}">
                         {{name}}
@@ -76,20 +73,21 @@
             <label for="experimenttype">{{#str}}experimenttype, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <select class="form-control" name="param2" id="experimenttype">
-                <option value="single" {{#is_single}}selected="selected"{{/is_single}}>{{#str}}experimenttype_single, datafield_harpiainteraction{{/str}}</option>
-                <option value="chat" {{#is_chat}}selected="selected"{{/is_chat}}>{{#str}}experimenttype_chat, datafield_harpiainteraction{{/str}}</option>
+            <select class="form-control" name="param2" id="experimenttype" data-initial-value="{{param2}}">
+                <option value="" id="experimenttype-nooption"></option>
+                <option value="single">{{#str}}experimenttype_single, datafield_harpiainteraction{{/str}}</option>
+                <option value="chat">{{#str}}experimenttype_chat, datafield_harpiainteraction{{/str}}</option>
             </select>
         </div>
     </div>
     
     <!-- System prompt --> 
-    <div class="form-group row fitem {{#hide_prompt}}hidden{{/hide_prompt}}" id="system-prompt-row" >
+    <div class="form-group row fitem hidden" id="system-prompt-row" >
         <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
             <label for="system-prompt-input">{{#str}}systemprompt, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <textarea class="form-control" name="param3" id="system-prompt-input" placeholder="{{prompt_placeholder}}">{{field.param3}}</textarea>
+            <textarea class="form-control" name="param3" id="system-prompt-input" >{{param3}}</textarea>
         </div>
     </div>
 
@@ -99,10 +97,35 @@
     const answerProviders = document.getElementById('answerproviders');
     const systemPromptInput = document.getElementById('system-prompt-input');
     const systemPromptRow = document.getElementById('system-prompt-row');
+    const expTypeSelect = document.getElementById('experimenttype');
 
     answerProviders.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         systemPromptInput.setAttribute('placeholder', selectedOption.getAttribute('data-default-system-prompt'));
-        systemPromptRow.classList[parseInt(selectedOption.getAttribute('data-supports-system-prompt')) ? 'remove' : 'add']('hidden');
+        const supportsPrompt = Boolean(parseInt(selectedOption.getAttribute('data-supports-system-prompt')));
+        systemPromptRow.classList[supportsPrompt ? 'remove' : 'add']('hidden');
+        if (!supportsPrompt) {
+            // System prompt not supported: hide field, clear it, but preserve its value
+            // (if the user submits the form with a provider that does not support
+            //  system prompts, the value will be empty; but if the user changes
+            //  back to a model that supports system prompts before submitting,
+            //  the value will be restored)
+            systemPromptRow.classList.add('hidden');
+            if (systemPromptInput.value)
+                systemPromptInput.setAttribute('data-saved-value', systemPromptInput.value);
+            systemPromptInput.value = '';
+        } else {
+            // System prompt supported: show field and restore value (if any)
+            systemPromptInput.value = systemPromptInput.getAttribute('data-saved-value') || '';
+            systemPromptRow.classList.remove('hidden');
+        }
     });
+    
+    
+    expTypeSelect.value = expTypeSelect.getAttribute("data-initial-value");
+    document.getElementById("experimenttype-nooption").remove();
+
+    answerProviders.value = answerProviders.getAttribute("data-initial-value");
+    answerProviders.dispatchEvent(new Event("change"));
+    document.getElementById("answerproviders-nooption").remove();
 {{/js}}

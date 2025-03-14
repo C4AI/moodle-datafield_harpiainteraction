@@ -425,19 +425,6 @@ class data_field_harpiainteraction extends data_field_base
         $providers = send_message::fetch_providers()->providers;
         $data["providers"] = $providers;
 
-        $prompt_placeholder = '';
-        $hide_prompt = false;
-        foreach ($providers as $provider) {
-            $checked = '';
-            if ($this->field->param1 === $provider->name) {
-                $checked = ' selected="selected"';
-                $prompt_placeholder = $provider->default_system_prompt;
-                $hide_prompt = !$provider->supports_system_prompt;
-            }
-        }
-        $data["prompt_placeholder"] = $prompt_placeholder;
-        $data["hide_prompt"] = $hide_prompt;
-
         return $data;
     }
 }
