@@ -409,4 +409,35 @@ class data_field_harpiainteraction extends data_field_base
         }
         return $configs;
     }
+
+
+    public function get_field_params(): array
+    {
+        // This function defines the fields that will be available
+        // in the Mustache template (shown when the field definition is created/edited
+        // by a teacher)
+        global $DB, $CFG;
+
+        $data = parent::get_field_params();
+
+        require_once($CFG->dirroot . '/local/harpiaajax/send_message.php');
+
+        $providers = send_message::fetch_providers()->providers;
+        $data["providers"] = $providers;
+
+        $prompt_placeholder = '';
+        $hide_prompt = false;
+        foreach ($providers as $provider) {
+            $checked = '';
+            if ($this->field->param1 === $provider->name) {
+                $checked = ' selected="selected"';
+                $prompt_placeholder = $provider->default_system_prompt;
+                $hide_prompt = !$provider->supports_system_prompt;
+            }
+        }
+        $data["prompt_placeholder"] = $prompt_placeholder;
+        $data["hide_prompt"] = $hide_prompt;
+
+        return $data;
+    }
 }

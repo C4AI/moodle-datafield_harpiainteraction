@@ -1,0 +1,108 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template datafield_harpiainteraction/harpiainteraction
+
+    The purpose of this template is to enable the user to define an harpiainteraction field.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * name string The field's name.
+    * description string The field's description.
+    * required bool The field's requiredness.
+    * param1 string The selected answer provider's name.
+    * param2 string The selected experiment type ("single" or "chat").
+    * param3 string The system prompt.
+    * prompt_placeholder string The default system prompt for the selected provider.
+    * hide_prompt bool Whether the prompt field should start hidden.
+
+    Example context (json):
+    {
+        "name": "A name",
+        "description": "A description",
+        "required": true,
+        "param1": "a model name",
+        "param2": "single",
+        "param3": "You are an assistant. Answer concisely.",
+        "prompt_placeholder": "You are an assistant.",
+        "hide_prompt": false
+    }
+}}
+
+<fieldset>
+    {{> mod_data/fields/basicfields }}
+    {{> mod_data/fields/requiredfield }}
+
+    <!-- Answer provider --> 
+    <div class="form-group row fitem">
+        <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
+            <label for="provider-name-input">{{#str}}providername, datafield_harpiainteraction{{/str}}</label>
+        </div>
+        <div class="col-md-9 form-inline align-items-start felement">
+            <select class="form-control" id="answerproviders" name="param1" id="provider-name-input" >
+                {{#providers}}
+                    <option value="{{name}}" {{#selected}}selected="selected"{{/selected}}
+                        data-default-system-prompt="{{default_system_prompt}}"
+                        data-supports-system-prompt="{{supports_system_prompt}}">
+                        {{name}}
+                    </option>
+                {{/providers}}
+            </select>
+        </div>
+    </div>
+
+    <!-- Experiment type -->
+    <div class="form-group row fitem">
+        <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
+            <label for="experimenttype">{{#str}}experimenttype, datafield_harpiainteraction{{/str}}</label>
+        </div>
+        <div class="col-md-9 form-inline align-items-start felement">
+            <select class="form-control" name="param2" id="experimenttype">
+                <option value="single" {{#is_single}}selected="selected"{{/is_single}}>{{#str}}experimenttype_single, datafield_harpiainteraction{{/str}}</option>
+                <option value="chat" {{#is_chat}}selected="selected"{{/is_chat}}>{{#str}}experimenttype_chat, datafield_harpiainteraction{{/str}}</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- System prompt --> 
+    <div class="form-group row fitem {{#hide_prompt}}hidden{{/hide_prompt}}" id="system-prompt-row" >
+        <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
+            <label for="system-prompt-input">{{#str}}systemprompt, datafield_harpiainteraction{{/str}}</label>
+        </div>
+        <div class="col-md-9 form-inline align-items-start felement">
+            <textarea class="form-control" name="param3" id="system-prompt-input" placeholder="{{prompt_placeholder}}">{{field.param3}}</textarea>
+        </div>
+    </div>
+
+
+</fieldset>
+{{#js}}
+    const answerProviders = document.getElementById('answerproviders');
+    const systemPromptInput = document.getElementById('system-prompt-input');
+    const systemPromptRow = document.getElementById('system-prompt-row');
+
+    answerProviders.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        systemPromptInput.setAttribute('placeholder', selectedOption.getAttribute('data-default-system-prompt'));
+        systemPromptRow.classList[parseInt(selectedOption.getAttribute('data-supports-system-prompt')) ? 'remove' : 'add']('hidden');
+    });
+{{/js}}
