@@ -56,8 +56,8 @@
         <div class="col-md-9 form-inline align-items-start felement">
             
             {{#providers.0}}
-                <select class="form-control" name="param1" id="provider-name-input" data-initial-value="{{param1}}">
-                <option value="" id="provider-name-nooption"></option>
+                <select class="form-control" name="param1" id="{{ uniqid }}-provider-name-input" data-initial-value="{{param1}}">
+                <option value="" id="{{ uniqid }}-provider-name-nooption"></option>
                 {{#providers}}
                     <option value="{{name}}" data-initial-value="{{param1}}"
                         data-default-system-prompt="{{default_system_prompt}}"
@@ -69,7 +69,7 @@
             {{/providers.0}}
             
             {{^providers}}
-                <input class="form-control"  name="param1" id="provider-name-input" type="text" readonly value="{{param1}}">
+                <input class="form-control"  name="param1" id="{{ uniqid }}-provider-name-input" type="text" readonly value="{{param1}}">
                 <div class="errorbox alert alert-danger">
                   {{#str}}cantfetchproviders, datafield_harpiainteraction{{/str}}
                 </div>
@@ -83,8 +83,8 @@
             <label for="experiment-type-input">{{#str}}experimenttype, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <select class="form-control" name="param2" id="experiment-type-input" data-initial-value="{{param2}}">
-                <option value="" id="experiment-type-nooption"></option>
+            <select class="form-control" name="param2" id="{{ uniqid }}-experiment-type-input" data-initial-value="{{param2}}">
+                <option value="" id="{{ uniqid }}-experiment-type-nooption"></option>
                 <option value="single">{{#str}}experimenttype_single, datafield_harpiainteraction{{/str}}</option>
                 <option value="chat">{{#str}}experimenttype_chat, datafield_harpiainteraction{{/str}}</option>
             </select>
@@ -92,22 +92,22 @@
     </div>
     
     <!-- System prompt --> 
-    <div class="form-group row fitem hidden" id="system-prompt-row" >
+    <div class="form-group row fitem hidden" id="{{ uniqid }}-system-prompt-row" >
         <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
             <label for="system-prompt-input">{{#str}}systemprompt, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <textarea class="form-control" name="param3" id="system-prompt-input" >{{param3}}</textarea>
+            <textarea class="form-control" name="param3" id="{{ uniqid }}-system-prompt-input" >{{param3}}</textarea>
         </div>
     </div>
 
 
 </fieldset>
 {{#js}}
-    const answerProviders = document.getElementById('provider-name-input');
-    const systemPromptInput = document.getElementById('system-prompt-input');
-    const systemPromptRow = document.getElementById('system-prompt-row');
-    const expTypeSelect = document.getElementById('experiment-type-input');
+    const answerProviders = document.getElementById('{{ uniqid }}-provider-name-input');
+    const systemPromptInput = document.getElementById('{{ uniqid }}-system-prompt-input');
+    const systemPromptRow = document.getElementById('{{ uniqid }}-system-prompt-row');
+    const expTypeSelect = document.getElementById('{{ uniqid }}-experiment-type-input');
 
     if (answerProviders.tagName.toLowerCase() == "select") {
         answerProviders.addEventListener('change', function() {
@@ -138,11 +138,11 @@
         });
         answerProviders.value = answerProviders.getAttribute("data-initial-value");
         answerProviders.dispatchEvent(new Event("change"));
-        document.getElementById("provider-name-nooption").remove();
+        document.getElementById("{{ uniqid }}-provider-name-nooption").remove();
     }
     
     expTypeSelect.value = expTypeSelect.getAttribute("data-initial-value");
-    document.getElementById("experiment-type-nooption").remove();
+    document.getElementById("{{ uniqid }}-experiment-type-nooption").remove();
 
     
 {{/js}}
