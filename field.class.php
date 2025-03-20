@@ -41,8 +41,8 @@ class data_field_harpiainteraction extends data_field_base
     const colAnswer = 'content1';
     const colHistory = 'content2';
 
-    // data fields
-    const colProviderHash = 'param1';
+    // columns in the `data_fields` table:
+    const colProvider = 'param1';
     const colExperimentType = 'param2';
     const colSystemPrompt = 'param3';
 
@@ -104,7 +104,7 @@ class data_field_harpiainteraction extends data_field_base
         } else {
             // Creating a new record
             $history = [];
-            $parent_rid = $_GET['parentrid'];
+            $parent_rid = $_GET['parentrid'] ?? null;
             if ($parent_rid) {
                 $where = array('fieldid' => $this->field->id, 'recordid' => $parent_rid);
                 $history = array_merge(json_decode($DB->get_field('data_content', self::colHistory, $where) ?: '[]'), [
@@ -119,106 +119,15 @@ class data_field_harpiainteraction extends data_field_base
             ];
         }
 
-        $provider_hash = password_hash($this->field->{self::colProviderHash}, PASSWORD_DEFAULT);
-
-        $history_html = '<input type="hidden" name="field_%{field_id}_history" value="' . s(json_encode($content['history'])) . '" />';
-        if ($content['history']) {
-            $fromUser = true;
-            $parts = ['<tr><td style="vertical-align: top;">%{history_label}</td><td><table border="1">'];
-            foreach ($content['history'] as $msg) {
-                $parts[] = '<tr><th>' .
-                    ($fromUser ? '%{user_label}' : '%{bot_label}') .
-                    '</th><td>' . s($msg) . '</td></tr>';
-                $fromUser = !$fromUser;
-            }
-            $parts[] = '</table></td></tr>';
-            $history_html .= '<tr><td colspan="2">' . implode('', $parts) . '</td></tr>';
-        }
-
-
-
-
-        $str = <<<ENDSTR
-            <div title="%{description_label}" class="mod-data-input form-inline" data-field-id="%{field_id}">
-                <div style="width:100%;">
-                    <table data-field-id="%{field_id}" style="width:100%;">
-                        <tbody>
-                            $history_html
-                            <tr>
-                                <td>
-                                    <label for="field_%{field_id}_query">%{query_label}&nbsp;&nbsp;</label>
-                                </td>
-                                <td style="margin: 1em; width:99%;">
-                                    <div style="display:flex;">
-                                        <input class="harpiainteraction-field" type="text" class="form-control" id="field_%{field_id}_query"
-                                            name="field_%{field_id}_query" value="%{query_value}" %{query_attrs} style="flex:2" />
-                                        &nbsp;&nbsp;
-                                        <button id="field_%{field_id}_send" class="btn btn-primary harpiainteraction-btn-send" type="button" style="display:%{send_display}" >%{send_btn}</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr data-field-id="%{field_id}" style="width:100%;margin-top:1em;">
-                                <td style="vertical-align:top;">
-                                    <label>%{answer_label}</label>
-                                </td>
-                                <td>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <p class="lm-answer"
-                                        style="font-style:italic; border:none; resize: none; width:100%; vertical-align:top; margin-left:1em;"
-                                    >%{answer_value}</p>
-                                    <input type="hidden" name="field_%{field_id}_answer" class="lm-answer-hidden" value="%{answer_value}" />
-                                </td>
-                            </tr>
-                            <tr class="lm-contexts" style="display:none">
-                                <td>%{contexts_label}</td>
-                            </tr>
-                            
-                            <template class="lm-context-template">
-                                <tr>
-                                    <td colspan="2">
-                                        <details class="lm-context" style="width:100%;">
-                                            <summary class="lm-context-header"></summary>
-                                            <p class="lm-context-text" style="font-style:italic"></p>
-                                        </details>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-                <br/>
-                <input type="hidden" name="field_%{field_id}_providerhash" value="%{provider_hash}" />
-            </div>
-            <style>.harpiainteraction-field:read-only { border: none; cursor: not-allowed; font-style: italic; }</style>
-            <script>
-                document.getElementById('field_%{field_id}_query').addEventListener('keypress', function(event) {
-                    if (event.keyCode === 13) {
-                        event.preventDefault();
-                        document.getElementById('field_%{field_id}_send').click();
-                    }
-                });
-            </script>
-        ENDSTR;
-
-        return strtr($str, [
-            '%{description_label}' => s($this->field->description),
-            '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
-            '%{send_btn}' => s(get_string('send', 'datafield_harpiainteraction')),
-            '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
-            '%{contexts_label}' => s(get_string('contexts', 'datafield_harpiainteraction')),
-            '%{history_label}' => s(get_string('history', 'datafield_harpiainteraction')),
-            '%{field_id}' => $this->field->id,
-            '%{query_value}' => s($content['query'] ?? 'NULL'),
-            '%{answer_value}' => s($content['answer'] ?? ''),
-            '%{send_display}' => $content['answer'] ? 'none' : 'initial',
-            '%{query_attrs}' => $content['answer'] ? 'readonly="readonly"' : '',
-            '%{provider_hash}' => s($provider_hash),  # prevent users from guessing other providers
-            '%{user_label}' => s(get_string('usersender', 'datafield_harpiainteraction')),
-            '%{bot_label}' => s(get_string('botsender', 'datafield_harpiainteraction')),
-        ]);
+        $templatename = 'datafield_' . $this->type . '/' . $this->type . '_addfield';
+        $data = [
+            'field_id' => $this->field->id,
+            'description' => $this->field->description ?? '',
+            'query' => $content['query'] ?? '',
+            'answer' => $content['answer'] ?? '',
+            'history' => $content['history'] ?? [],
+        ];
+        return $OUTPUT->render_from_template($templatename, $data);
     }
 
 
@@ -233,7 +142,7 @@ class data_field_harpiainteraction extends data_field_base
                 <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_query" value="%{query}" />
                 <label for="f_%{field_id}_answer">%{answer_label}</label>
                 <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_answer" value="%{answer}" />
-                <label for="f_%{field_id}_history">%{history_label}</label>
+                <label for="f_%{field_id}_history">{{#str}}history, datafield_harpiainteraction{{/str}}</label>
                 <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_history" value="%{history}" />
             </fieldset>
         ENDSTR;
@@ -307,10 +216,7 @@ class data_field_harpiainteraction extends data_field_base
         $key = $name_parts[array_key_last($name_parts)];
         if (!in_array($key, ['query', 'answer', 'history']))
             return;
-        if ($key === 'history')
-            $this->$key = json_decode($value ?: '[]') ?? [];
-        else
-            $this->$key = $value ?? '';
+        $this->$key = $value ?? '';
 
 
         if ($this->query !== null and $this->answer !== null and $this->history !== null) {
@@ -349,7 +255,7 @@ class data_field_harpiainteraction extends data_field_base
         $history = json_decode($content->{self::colHistory} ?: '[]');
         if ($history) {
             $fromUser = true;
-            $parts = ['<details><summary>%{history_label}</summary><table border="1">'];
+            $parts = ['<details><summary>{{#str}}history, datafield_harpiainteraction{{/str}}</summary><table border="1">'];
             foreach ($history as $msg) {
                 $parts[] = '<tr><th>' .
                     ($fromUser ? '%{user_label}' : '%{bot_label}') .
@@ -415,16 +321,25 @@ class data_field_harpiainteraction extends data_field_base
     {
         // This function defines the fields that will be available
         // in the Mustache template (shown when the field definition is created/edited
-        // by a teacher)
+        // by a teacher).
         global $DB, $CFG;
 
         $data = parent::get_field_params();
 
+        // get list of answer providers from HarpIA Ajax plugin
         require_once($CFG->dirroot . '/local/harpiaajax/send_message.php');
-
         $providers = send_message::fetch_providers()->providers;
-        $data["providers"] = $providers;
 
-        return $data;
+        return [
+            "name" => $data["name"],
+            "description" => $data["description"],
+            "answer_provider_col" => self::colProvider,
+            "answer_provider" => $data[self::colProvider],
+            "experiment_type_col" => self::colExperimentType,
+            "experiment_type" => $data[self::colExperimentType],
+            "system_prompt_col" => self::colSystemPrompt,
+            "system_prompt" => $data[self::colSystemPrompt],
+            "providers" => $providers, // list of all answer providers
+        ];
     }
 }

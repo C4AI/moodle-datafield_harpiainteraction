@@ -1,0 +1,135 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+ 
+<div
+  title="{{ description }}"
+  class="mod-data-input form-inline harpiainteraction-addfield"
+  data-field-id="{{ field_id }}"
+>
+  <div style="width: 100%">
+    <table data-field-id="{{ field_id }}" style="width: 100%">
+      <tbody>
+        <div class="history">
+            {{#history}}
+              <div class="message">{{.}}</div>
+            {{/history}}
+        </div>
+        <tr>
+          <td>
+            <label for="{{ uniqid }}-field_{{ field_id }}_query">
+              {{#str}}query, datafield_harpiainteraction{{/str}}
+              &nbsp;&nbsp;
+            </label>
+          </td>
+          <td style="margin: 1em; width: 99%">
+            <div style="display: flex">
+              <input class="harpiainteraction-field form-control" type="text"
+                id="{{ uniqid }}-field_{{ field_id }}_query"
+                name="field_{{ field_id }}_query" value="{{ query }}" style="flex:2"
+                {{#answer}} readonly="readonly" {{/answer}} 
+              />
+              &nbsp;&nbsp;
+              <button id="{{ uniqid }}-field_{{ field_id }}_send"
+                class="btn btn-primary harpiainteraction-btn-send" type="button"
+                style="{{#answer}}none{{/answer}}{{^answer}}initial{{/answer}}"
+              >
+                {{#str}}send, datafield_harpiainteraction{{/str}}
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr data-field-id="{{ field_id }}" style="width: 100%; margin-top: 1em">
+          <td style="vertical-align: top">
+            <label>{{#str}}answer, datafield_harpiainteraction{{/str}}</label>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <p class="lm-answer">
+              {{answer}}
+            </p>
+            <input
+              type="hidden"
+              name="field_{{ field_id }}_answer"
+              class="lm-answer-hidden"
+              value="%{answer_value}"
+            />
+          </td>
+        </tr>
+
+        <template class="lm-context-template">
+          <tr>
+            <td colspan="2">
+              <details class="lm-context" style="width: 100%">
+                <summary class="lm-context-header"></summary>
+                <p class="lm-context-text" style="font-style: italic"></p>
+              </details>
+            </td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+  <br />
+</div>
+
+
+<style>
+
+    .harpiainteraction-addfield .history {
+      margin-bottom: 1em;
+    }
+
+    .harpiainteraction-addfield .message {
+        border: 1px solid;
+        border-radius: 1em;
+        padding: 0.5em;
+        margin-bottom: 0.5em;
+        width: max(70%, 500px);
+        background-color: #cccccc;
+        
+    }
+
+    .harpiainteraction-addfield .message:nth-child(odd) {
+      margin-left: auto;
+    }
+
+    .harpiainteraction-addfield .lm-answer {
+      font-style: italic;
+      border: none;
+      resize: none;
+      width: 100%;
+      vertical-align: top;
+      margin-left: 1em;
+    }
+
+    .harpiainteraction-addfield .harpiainteraction-field:read-only {
+        border: none;
+        cursor: not-allowed;
+        font-style: italic;
+    }
+</style>
+
+{{#js}}
+    document.getElementById('{{ uniqid }}-field_{{ field_id }}_query').addEventListener('keypress', function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById('field_{{ field_id }}_send').click();
+        }
+    });
+{{/js}}

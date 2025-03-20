@@ -10,20 +10,16 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
       const outer = btn.closest(".form-inline")[0];
       const fieldId = outer.getAttribute("data-field-id");
       const field = $(outer).find('.harpiainteraction-field')[0];
-      const providerHash = $('input[name="field_' + fieldId + '_providerhash"]').val();
-      const history = JSON.parse($('input[name="field_' + fieldId + '_history"]').val());
       btn.hide();
       $(field).prop("readonly", true);
 
       ajax
         .call([
           {
-            methodname: "local_harpiaajax_send_message",
+            methodname: "local_harpiaajax_send_message_to_datafield_harpiainteraction",
             args: {
               query: field.value,
-              provider_hash: providerHash,
-              history: history,
-              harpia_data_field_id: fieldId,
+              field_id: fieldId,
             },
           },
         ])[0]

@@ -26,21 +26,27 @@
     * none
 
     Context variables required for this template:
-    * name string The field's name.
-    * description string The field's description.
-    * required bool The field's requiredness.
-    * param1 string The selected answer provider's name.
-    * param2 string The selected experiment type ("single" or "chat").
-    * param3 string The system prompt.
+    * name                 string  The field's name.
+    * description          string  The field's description.
+    * required             bool    The field's requiredness.
+    * answer_provider      string  The selected answer provider's name.
+    * answer_provider_col  string  Name of the column in the `data_fields` table that stores the answer provider name.
+    * experiment_type      string  The selected experiment type ("single" or "chat").
+    * experiment_type_col  string  Name of the column in the `data_fields` table that stores the experiment type.
+    * system_prompt        string  The system prompt.
+    * system_prompt_col    string  Name of the column in the `data_fields` table that stores the system prompt.
 
     Example context (json):
     {
         "name": "A name",
         "description": "A description",
         "required": true,
-        "param1": "a model name",
-        "param2": "single",
-        "param3": "You are an assistant. Answer concisely.",
+        "answer_provider": "an answer provider name",
+        "answer_provider_col": "param1",
+        "experiment_type": "single",
+        "experiment_type_col": "param2",
+        "system_prompt": "You are an assistant. Answer concisely.",
+        "system_prompt_col": "param3",
     }
 }}
 
@@ -56,10 +62,10 @@
         <div class="col-md-9 form-inline align-items-start felement">
             
             {{#providers.0}}
-                <select class="form-control" name="param1" id="{{ uniqid }}-provider-name-input" data-initial-value="{{param1}}">
+                <select class="form-control" name="{{answer_provider_col}}" id="{{ uniqid }}-provider-name-input" data-initial-value="{{answer_provider}}">
                 <option value="" id="{{ uniqid }}-provider-name-nooption"></option>
                 {{#providers}}
-                    <option value="{{name}}" data-initial-value="{{param1}}"
+                    <option value="{{name}}" data-initial-value="{{answer_provider}}"
                         data-default-system-prompt="{{default_system_prompt}}"
                         data-supports-system-prompt="{{supports_system_prompt}}">
                         {{name}}
@@ -69,7 +75,7 @@
             {{/providers.0}}
             
             {{^providers}}
-                <input class="form-control"  name="param1" id="{{ uniqid }}-provider-name-input" type="text" readonly value="{{param1}}">
+                <input class="form-control"  name="{{answer_provider_col}}" id="{{ uniqid }}-provider-name-input" type="text" readonly value="{{answer_provider}}">
                 <div class="errorbox alert alert-danger">
                   {{#str}}cantfetchproviders, datafield_harpiainteraction{{/str}}
                 </div>
@@ -83,7 +89,7 @@
             <label for="experiment-type-input">{{#str}}experimenttype, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <select class="form-control" name="param2" id="{{ uniqid }}-experiment-type-input" data-initial-value="{{param2}}">
+            <select class="form-control" name="{{experiment_type}}" id="{{ uniqid }}-experiment-type-input" data-initial-value="{{experiment_type}}">
                 <option value="" id="{{ uniqid }}-experiment-type-nooption"></option>
                 <option value="single">{{#str}}experimenttype_single, datafield_harpiainteraction{{/str}}</option>
                 <option value="chat">{{#str}}experimenttype_chat, datafield_harpiainteraction{{/str}}</option>
@@ -97,7 +103,7 @@
             <label for="system-prompt-input">{{#str}}systemprompt, datafield_harpiainteraction{{/str}}</label>
         </div>
         <div class="col-md-9 form-inline align-items-start felement">
-            <textarea class="form-control" name="param3" id="{{ uniqid }}-system-prompt-input" >{{param3}}</textarea>
+            <textarea class="form-control" name="{{system_prompt_col}}" id="{{ uniqid }}-system-prompt-input" >{{system_prompt}}</textarea>
         </div>
     </div>
 
