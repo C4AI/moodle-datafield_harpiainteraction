@@ -1,0 +1,81 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+ 
+ <div class="harpiainteraction-browse">
+    {{#history.0}}
+        <details class="harpiainteraction-browse-history">
+            <summary>
+                {{#str}}history, datafield_harpiainteraction{{/str}}
+            </summary>
+            <div>
+                {{#history}}
+                    <div class="message">{{.}}</div>
+                {{/history}}
+            </div>
+        </details>
+    {{/history.0}}
+
+    <div>
+        <u>{{#str}}query, datafield_harpiainteraction{{/str}}</u>
+        <div>
+            <div class="message">{{query}}</div>
+        </div>
+        <u>{{#str}}answer, datafield_harpiainteraction{{/str}}</u>
+        <div>
+            <span></span>
+            <div class="message">{{answer}}</div>
+        </div>
+    </div>
+
+
+    <br>
+
+    {{#continue_url}}
+        <br>
+        <a href="{{{continue_url}}}">
+            {{#str}}continue, datafield_harpiainteraction{{/str}}
+        </a>
+    {{/continue_url}}
+
+</div>
+
+ <style>
+    .harpiainteraction-browse-history {
+        margin-bottom: 1em;
+        padding: 0.3em;
+    }
+
+    .harpiainteraction-browse-history:open {
+        border: 1px solid;
+        border-radius: 0.3em;
+        
+    }
+
+    .harpiainteraction-browse .message {
+        border: 1px solid;
+        border-radius: 1em;
+        padding: 0.5em;
+        margin-bottom: 0.5em;
+        width: max(70%, 500px);
+        background-color: #cccccc;
+        
+    }
+
+    .harpiainteraction-browse .message:nth-child(odd) {
+        margin-left: auto;
+    }
+ </style>

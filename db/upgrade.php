@@ -26,7 +26,7 @@ function xmldb_datafield_harpiainteraction_upgrade($oldversion)
     $result = TRUE;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2025031905) {
+    if ($oldversion < 2025031906) {
 
         // Define table data_harpiainteraction to be created.
         $table = new xmldb_table('data_harpiainteraction');
@@ -36,7 +36,8 @@ function xmldb_datafield_harpiainteraction_upgrade($oldversion)
         $table->add_field('timestamp', XMLDB_TYPE_INTEGER, '19', null, XMLDB_NOTNULL, null, null);
         $table->add_field('userid', XMLDB_TYPE_INTEGER, '19', null, XMLDB_NOTNULL, null, null);
         $table->add_field('dataid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('parentdataid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('recordid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('parentrecordid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
         $table->add_field('answer_provider', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, null, null);
         $table->add_field('query', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
         $table->add_field('system_prompt', XMLDB_TYPE_TEXT, null, null, null, null, null);
@@ -45,7 +46,8 @@ function xmldb_datafield_harpiainteraction_upgrade($oldversion)
         // Adding keys to table data_harpiainteraction.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
         $table->add_key('dataid-', XMLDB_KEY_FOREIGN, ['dataid'], 'data', ['id']);
-        $table->add_key('parentdataid-', XMLDB_KEY_FOREIGN, ['parentdataid'], 'data', ['id']);
+        $table->add_key('recordid-', XMLDB_KEY_FOREIGN, ['recordid'], 'data_records', ['id']);
+        $table->add_key('parentrecordid-', XMLDB_KEY_FOREIGN, ['parentrecordid'], 'data_records', ['id']);
         $table->add_key('userid-', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
 
         // Conditionally launch create table for data_harpiainteraction.
@@ -54,7 +56,7 @@ function xmldb_datafield_harpiainteraction_upgrade($oldversion)
         }
 
         // harpiainteraction savepoint reached.
-        upgrade_plugin_savepoint(true, 2025031905, 'datafield', 'harpiainteraction');
+        upgrade_plugin_savepoint(true, 2025031906, 'datafield', 'harpiainteraction');
 
     }
 

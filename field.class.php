@@ -49,6 +49,7 @@ class data_field_harpiainteraction extends data_field_base
 
     var $query = null;
     var $answer = null;
+    var $history = null;
 
     public function supports_preview(): bool
     {
@@ -126,6 +127,7 @@ class data_field_harpiainteraction extends data_field_base
             'query' => $content['query'] ?? '',
             'answer' => $content['answer'] ?? '',
             'history' => $content['history'] ?? [],
+            'parent_rid' => $parent_rid ?? '',
         ];
         return $OUTPUT->render_from_template($templatename, $data);
     }
@@ -208,16 +210,48 @@ class data_field_harpiainteraction extends data_field_base
     function update_content($recordid, $value, $name = '')
     {
 
-        // This function is called
-        // once per FORM FIELD (in our case, the form fields are query, answer and history).        
+        // This function is called once per FORM FIELD
+        // (in our case, the form fields are:
+        // - "interactionid".        
 
         // Extract name of the HTML field
         $name_parts = explode('_', $name);
         $key = $name_parts[array_key_last($name_parts)];
-        if (!in_array($key, ['query', 'answer', 'history']))
-            return;
-        $this->$key = $value ?? '';
 
+
+        if (!in_array($key, ['interactionid']))
+            return;
+
+        global $DB, $USER;
+
+
+        switch ($key) {
+
+            case "interactionid":
+
+                if ($this->answer !== null)
+                    return;
+
+
+                $where = ['id' => $value, 'userid' => $USER->id, 'recordid' => null];
+                $record = $DB->get_record('data_harpiainteraction', $where);
+                $this->query = $record->query;
+                $this->answer = $record->answer;
+                $this->history = [];
+                if ($record->parentrecordid) {
+                    $where = ['fieldid' => $this->field->id, 'recordid' => $record->parentrecordid];
+                    $prev_record = $DB->get_record('data_content', $where);
+                    $this->history = json_decode($prev_record->{self::colHistory} ?: '[]') + [
+                        $prev_record->{self::colQuery},
+                        $prev_record->{self::colAnswer}
+                    ];
+                }
+
+                break;
+
+            default: // no other fields for now - data is obtained from the interaction table
+                return;
+        }
 
         if ($this->query !== null and $this->answer !== null and $this->history !== null) {
             // All values have been colected, so we store them in the DB
@@ -243,53 +277,33 @@ class data_field_harpiainteraction extends data_field_base
 
     function display_browse_field($recordid, $template)
     {
-
         // This function generates the summary of the data of this field,
         // displayed on the entry list
+
+        global $OUTPUT;
 
         $content = $this->get_data_content($recordid);
         if (!$content || empty($content->{self::colQuery})) {
             return '';
         }
-        $history_html = '';
-        $history = json_decode($content->{self::colHistory} ?: '[]');
-        if ($history) {
-            $fromUser = true;
-            $parts = ['<details><summary>{{#str}}history, datafield_harpiainteraction{{/str}}</summary><table border="1">'];
-            foreach ($history as $msg) {
-                $parts[] = '<tr><th>' .
-                    ($fromUser ? '%{user_label}' : '%{bot_label}') .
-                    '</th><td>' . s($msg) . '</td></tr>';
-                $fromUser = !$fromUser;
-            }
-            $parts[] = '</table></details><br>';
-            $history_html .= implode('', $parts);
-        }
 
-
-        $str = $history_html . <<<ENDSTR
-            <u>%{query_label}</u> <i>%{query}</i>
-            <br>
-            <u>%{answer_label}</u> <i>%{answer}</i>
-            <br>
-        ENDSTR;
-
+        $templatename = 'datafield_' . $this->type . '/' . $this->type . '_browse';
+        $continue_url = '';
         if ($this->field->{self::colExperimentType} == 'chat')
-            $str .= '<br><a href="' . (new moodle_url('/mod/data/edit.php', [
+            $continue_url = (new moodle_url('/mod/data/edit.php', [
                 'd' => $this->data->id,
                 'parentrid' => $recordid
-            ]))->out() . '">%{continue_label}</a>';
+            ]))->out();
+        $data = [
+            'field_id' => $this->field->id,
+            'description' => $this->field->description ?? '',
+            'query' => $content->{self::colQuery} ?? '',
+            'answer' => $content->{self::colAnswer} ?? '',
+            'history' => json_decode($content->{self::colHistory} ?? '[]') ?? [],
+            'continue_url' => $continue_url,
+        ];
+        return $OUTPUT->render_from_template($templatename, $data);
 
-        return strtr($str, [
-            '%{query}' => s($content->{self::colQuery}),
-            '%{answer}' => s($content->{self::colAnswer}),
-            '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
-            '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
-            '%{history_label}' => s(get_string('history', 'datafield_harpiainteraction')),
-            '%{continue_label}' => s(get_string('continue', 'datafield_harpiainteraction')),
-            '%{user_label}' => s(get_string('usersender', 'datafield_harpiainteraction')),
-            '%{bot_label}' => s(get_string('botsender', 'datafield_harpiainteraction')),
-        ]);
     }
 
     function export_text_value($record)

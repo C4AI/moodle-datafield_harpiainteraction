@@ -10,7 +10,8 @@
         <FIELD NAME="timestamp" TYPE="int" LENGTH="19" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="19" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="parentdataid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="parentrecordid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="answer_provider" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="query" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="system_prompt" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
@@ -19,7 +20,8 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="dataid-" TYPE="foreign" FIELDS="dataid" REFTABLE="data" REFFIELDS="id"/>
-        <KEY NAME="parentdataid-" TYPE="foreign" FIELDS="parentdataid" REFTABLE="data" REFFIELDS="id"/>
+        <KEY NAME="recordid-" TYPE="foreign" FIELDS="recordid" REFTABLE="data_records" REFFIELDS="id"/>
+        <KEY NAME="parentrecordid-" TYPE="foreign" FIELDS="parentrecordid" REFTABLE="data_records" REFFIELDS="id"/>
         <KEY NAME="userid-" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>

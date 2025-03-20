@@ -9,7 +9,11 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
       const btn = $(this);
       const outer = btn.closest(".form-inline")[0];
       const fieldId = outer.getAttribute("data-field-id");
-      const field = $(outer).find('.harpiainteraction-field')[0];
+      const field = $(outer).find(".harpiainteraction-field")[0];
+
+      const parentRIdElem = $(outer).find(".parentrid");
+      const parentRId = parentRIdElem.length ? parentRIdElem[0].value : null;
+
       btn.hide();
       $(field).prop("readonly", true);
 
@@ -20,15 +24,17 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
             args: {
               query: field.value,
               field_id: fieldId,
+              parent_rid: parentRId,
             },
           },
         ])[0]
         .done(function (response) {
+
           const outputArea = $(
             '.form-inline[data-field-id="' + fieldId + '"]'
           );
           outputArea.find(".lm-answer").text(response["output"]["answer"]);
-          outputArea.find(".lm-answer-hidden").val(response["output"]["answer"]);
+          outputArea.find(".interactionid").val(response["output"]["interaction_id"]);
           if (response["output"]["contexts"].length)
             outputArea.find(".lm-contexts").show();
           response["output"]["contexts"].forEach((context, i) => {

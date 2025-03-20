@@ -20,6 +20,10 @@
   class="mod-data-input form-inline harpiainteraction-addfield"
   data-field-id="{{ field_id }}"
 >
+  {{#parent_rid}}
+    <input type="hidden" class="parentrid" value="{{ parent_rid }}" />
+  {{/parent_rid}}
+  <input type="hidden" name="field_{{ field_id }}_interactionid" class="interactionid" value="0" />
   <div style="width: 100%">
     <table data-field-id="{{ field_id }}" style="width: 100%">
       <tbody>
@@ -31,7 +35,7 @@
         <tr>
           <td>
             <label for="{{ uniqid }}-field_{{ field_id }}_query">
-              {{#str}}query, datafield_harpiainteraction{{/str}}
+              <u>{{#str}}query, datafield_harpiainteraction{{/str}}</u>
               &nbsp;&nbsp;
             </label>
           </td>
@@ -39,7 +43,7 @@
             <div style="display: flex">
               <input class="harpiainteraction-field form-control" type="text"
                 id="{{ uniqid }}-field_{{ field_id }}_query"
-                name="field_{{ field_id }}_query" value="{{ query }}" style="flex:2"
+                value="{{ query }}" style="flex:2"
                 {{#answer}} readonly="readonly" {{/answer}} 
               />
               &nbsp;&nbsp;
@@ -54,7 +58,7 @@
         </tr>
         <tr data-field-id="{{ field_id }}" style="width: 100%; margin-top: 1em">
           <td style="vertical-align: top">
-            <label>{{#str}}answer, datafield_harpiainteraction{{/str}}</label>
+            <label><u>{{#str}}answer, datafield_harpiainteraction{{/str}}</u></label>
           </td>
           <td></td>
         </tr>
@@ -63,12 +67,6 @@
             <p class="lm-answer">
               {{answer}}
             </p>
-            <input
-              type="hidden"
-              name="field_{{ field_id }}_answer"
-              class="lm-answer-hidden"
-              value="%{answer_value}"
-            />
           </td>
         </tr>
 
