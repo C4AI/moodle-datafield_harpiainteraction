@@ -51,6 +51,8 @@ class data_field_harpiainteraction extends data_field_base
     var $answer = null;
     var $history = null;
 
+    var $interaction_id = 0;
+
     public function supports_preview(): bool
     {
         return true;
@@ -76,58 +78,63 @@ class data_field_harpiainteraction extends data_field_base
         // This function generates the item in the form shown when the student (evaluator)
         // is adding or editing an entry
 
-        global $DB, $OUTPUT, $PAGE;
+        global $DB, $OUTPUT, $PAGE, $USER;
 
         // Include the Javascript code that calls the server requesting the language model's answer
         $PAGE->requires->js('/mod/data/field/harpiainteraction/assets/harpiainteraction.js');
 
-        if ($formdata) {
-            $fieldname = 'field_' . $this->field->id . '_query';
-            $query = $formdata->$fieldname;
-            $fieldname = 'field_' . $this->field->id . '_answer';
-            $answer = $formdata->$fieldname;
-            $fieldname = 'field_' . $this->field->id . '_history';
-            $history = json_decode($formdata->$fieldname ?? '[]');
+        // Start with empty values
+        $interaction_id = 0;
+        $history = [];
+        $query = '';
+        $answer = '';
+        $parent_rid = $_GET['parentrid'] ?? null;
 
-            $content = [
-                'history' => $history,
-                'query' => $query,
-                'answer' => $answer
-            ];
-        } else if ($recordid) {
-            // Editing an existing record
-            $where = array('fieldid' => $this->field->id, 'recordid' => $recordid);
-            $content = [
-                'history' => json_decode($DB->get_field('data_content', self::colHistory, $where) ?: '[]'),
-                'query' => $DB->get_field('data_content', self::colQuery, $where),
-                'answer' => $DB->get_field('data_content', self::colAnswer, $where),
-            ];
-        } else {
-            // Creating a new record
-            $history = [];
-            $parent_rid = $_GET['parentrid'] ?? null;
+        if ($recordid) { // Editing an existing record
+            // Retrieve data from the record
+            $where = ['fieldid' => $this->field->id, 'recordid' => $recordid];
+            $record = $DB->get_record('data_content', $where);
+            $history = json_decode($record->{self::colHistory} ?: '[]');
+            $query = $record->{self::colQuery};
+            $answer = $record->{self::colAnswer};
+            // Find its interaction id
+            $where = ['dataid' => $this->data->id, 'recordid' => $recordid];
+            $interaction_id = $DB->get_field('data_harpiainteraction', 'id', $where) ?? 0;
+        } else { // Creating a new record 
+            // If it has a parent record, fetch its history
             if ($parent_rid) {
-                $where = array('fieldid' => $this->field->id, 'recordid' => $parent_rid);
-                $history = array_merge(json_decode($DB->get_field('data_content', self::colHistory, $where) ?: '[]'), [
-                    $DB->get_field('data_content', self::colQuery, $where),
-                    $DB->get_field('data_content', self::colAnswer, $where),
-                ]);
+                $where = ['fieldid' => $this->field->id, 'recordid' => $parent_rid];
+                $parent_record = $DB->get_record('data_content', $where);
+                $history = array_merge(
+                    json_decode($parent_record->{self::colHistory} ?: '[]'),
+                    [
+                        $parent_record->{self::colQuery},
+                        $parent_record->{self::colAnswer}
+                    ]
+                );
             }
-            $content = [
-                'history' => $history,
-                'query' => '',
-                'answer' => ''
-            ];
         }
 
-        $templatename = 'datafield_' . $this->type . '/' . $this->type . '_addfield';
+        if ($formdata) { // Re-showing the form after submitting and failing (e.g. due to missing value)
+            // if an interaction has already been completed, retrieve its result to overwrite it
+            $interaction_id = $formdata->{'field_' . $this->field->id . '_interactionid'};
+            $where = ['id' => $interaction_id, 'userid' => $USER->id, 'recordid' => null];
+            $interaction = $DB->get_record('data_harpiainteraction', $where);
+            if ($interaction) {
+                $query = $interaction->query;
+                $answer = $interaction->answer;
+            }
+        }
+
+        $templatename = "datafield_{$this->type}/{$this->type}_addfield";
         $data = [
             'field_id' => $this->field->id,
             'description' => $this->field->description ?? '',
-            'query' => $content['query'] ?? '',
-            'answer' => $content['answer'] ?? '',
-            'history' => $content['history'] ?? [],
+            'query' => $query,
+            'answer' => $answer,
+            'history' => $history,
             'parent_rid' => $parent_rid ?? '',
+            'interaction_id' => $interaction_id,
         ];
         return $OUTPUT->render_from_template($templatename, $data);
     }
@@ -218,43 +225,42 @@ class data_field_harpiainteraction extends data_field_base
         $name_parts = explode('_', $name);
         $key = $name_parts[array_key_last($name_parts)];
 
-
         if (!in_array($key, ['interactionid']))
             return;
 
         global $DB, $USER;
 
-
         switch ($key) {
-
             case "interactionid":
-
-                if ($this->answer !== null)
-                    return;
-
-
-                $where = ['id' => $value, 'userid' => $USER->id, 'recordid' => null];
-                $record = $DB->get_record('data_harpiainteraction', $where);
-                $this->query = $record->query;
-                $this->answer = $record->answer;
-                $this->history = [];
-                if ($record->parentrecordid) {
-                    $where = ['fieldid' => $this->field->id, 'recordid' => $record->parentrecordid];
-                    $prev_record = $DB->get_record('data_content', $where);
-                    $this->history = json_decode($prev_record->{self::colHistory} ?: '[]') + [
-                        $prev_record->{self::colQuery},
-                        $prev_record->{self::colAnswer}
-                    ];
-                }
-
+                $this->interaction_id = $value;
                 break;
-
             default: // no other fields for now - data is obtained from the interaction table
                 return;
         }
+        $interaction = null;
 
-        if ($this->query !== null and $this->answer !== null and $this->history !== null) {
-            // All values have been colected, so we store them in the DB
+
+        if ($this->interaction_id) {
+            // All form fields have been collected
+
+            global $DB;
+
+            // find the interaction
+            $where = ['id' => $this->interaction_id, 'userid' => $USER->id, 'recordid' => null];
+            $interaction = $DB->get_record('data_harpiainteraction', $where);
+            if (!$interaction)
+                return false;
+            $this->query = $interaction->query;
+            $this->answer = $interaction->answer;
+            $this->history = [];
+            if ($interaction->parentrecordid) {
+                $where = ['fieldid' => $this->field->id, 'recordid' => $interaction->parentrecordid];
+                $prev_record = $DB->get_record('data_content', $where);
+                $this->history = array_merge(json_decode($prev_record->{self::colHistory} ?: '[]'), [
+                    $prev_record->{self::colQuery},
+                    $prev_record->{self::colAnswer}
+                ]);
+            }
 
             $content = new stdClass();
             $content->fieldid = $this->field->id;
@@ -262,16 +268,24 @@ class data_field_harpiainteraction extends data_field_base
             $content->{self::colQuery} = $this->query;
             $content->{self::colAnswer} = $this->answer;
             $content->{self::colHistory} = json_encode($this->history ?: []);
-
-            global $DB;
-            if ($oldcontent = $DB->get_record('data_content', array('fieldid' => $this->field->id, 'recordid' => $recordid))) {
-                // Updating an existing entry
+            if ($oldcontent = $DB->get_record('data_content', ['fieldid' => $this->field->id, 'recordid' => $recordid])) {
+                // Updating an existing row (this is called even for new entries
+                // because Moodle creates the row with NULL values)
                 $content->id = $oldcontent->id;
-                return $DB->update_record('data_content', $content);
+                if (!$DB->update_record('data_content', $content))
+                    return false;
             } else {
-                // Creating a new entry
-                return $DB->insert_record('data_content', $content);
+                // Creating a new row
+                if (!$DB->insert_record('data_content', $content))
+                    return false;
             }
+
+            // Link with the interaction
+            $interaction_data = new stdClass();
+            $interaction_data->id = $this->interaction_id;
+            $interaction_data->dataid = $this->data->id;
+            $interaction_data->recordid = $recordid;
+            return $DB->update_record('data_harpiainteraction', $interaction_data);
         }
     }
 

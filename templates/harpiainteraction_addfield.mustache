@@ -23,7 +23,7 @@
   {{#parent_rid}}
     <input type="hidden" class="parentrid" value="{{ parent_rid }}" />
   {{/parent_rid}}
-  <input type="hidden" name="field_{{ field_id }}_interactionid" class="interactionid" value="0" />
+  <input type="hidden" name="field_{{ field_id }}_interactionid" class="interactionid" value="{{ interaction_id }}" />
   <div style="width: 100%">
     <table data-field-id="{{ field_id }}" style="width: 100%">
       <tbody>
@@ -64,9 +64,7 @@
         </tr>
         <tr>
           <td colspan="2">
-            <p class="lm-answer">
-              {{answer}}
-            </p>
+            <p class="lm-answer">{{answer}}</p>
           </td>
         </tr>
 
@@ -91,6 +89,7 @@
 
     .harpiainteraction-addfield .history {
       margin-bottom: 1em;
+      border-bottom: 1px dashed grey;
     }
 
     .harpiainteraction-addfield .message {
@@ -100,7 +99,7 @@
         margin-bottom: 0.5em;
         width: max(70%, 500px);
         background-color: #cccccc;
-        
+        text-align: start;
     }
 
     .harpiainteraction-addfield .message:nth-child(odd) {
@@ -108,18 +107,24 @@
     }
 
     .harpiainteraction-addfield .lm-answer {
-      font-style: italic;
-      border: none;
-      resize: none;
-      width: 100%;
-      vertical-align: top;
-      margin-left: 1em;
+        border: 1px solid;
+        border-radius: 1em;
+        padding: 0.5em;
+        margin-bottom: 0.5em;
+        width: max(70%, 500px);
+        background-color: #eeeeee;
+        text-align: start;
+    }
+    
+    .harpiainteraction-addfield .lm-answer:empty {
+        display: none;
     }
 
     .harpiainteraction-addfield .harpiainteraction-field:read-only {
         border: none;
         cursor: not-allowed;
         font-style: italic;
+        text-align: start;
     }
 </style>
 
