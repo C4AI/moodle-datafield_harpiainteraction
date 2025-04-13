@@ -193,27 +193,16 @@ class data_field_harpiainteraction extends data_field_base {
      */
     public function display_search_field($value = null) {
         /* This function generates the search fields in the advanced search page. */
-        $str = <<<ENDSTR
-          <fieldset>
-            <legend>%{field_name}</legend>
-            <label for="f_%{field_id}_query">%{query_label}</label>
-            <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_query" value="%{query}" />
-            <label for="f_%{field_id}_answer">%{answer_label}</label>
-            <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_answer" value="%{answer}" />
-            <label for="f_%{field_id}_history">{{#str}}history, datafield_harpiainteraction{{/str}}</label>
-            <input type="text" class="form-control" size="16" id="f_%{field_id}" name="f_%{field_id}_history" value="%{history}" />
-          </fieldset>
-        ENDSTR;
-        return strtr($str, [
-            '%{field_id}' => $this->field->id,
-            '%{field_name}' => s($this->field->name),
-            '%{query_label}' => s(get_string('query', 'datafield_harpiainteraction')),
-            '%{query}' => s($value['query'] ?? ''),
-            '%{answer_label}' => s(get_string('answer', 'datafield_harpiainteraction')),
-            '%{answer}' => s($value['answer'] ?? ''),
-            '%{history_label}' => s(get_string('history', 'datafield_harpiainteraction')),
-            '%{history}' => s($value['history'] ?? ''),
-        ]);
+        global $OUTPUT;
+        $templatename = "datafield_{$this->type}/{$this->type}_search";
+        $data = [
+            'field_id' => $this->field->id,
+            'field_name' => $this->field->name,
+            'query' => $value['query'] ?? '',
+            'answer' => $value['answer'] ?? '',
+            'history' => $value['history'] ?? '',
+        ];
+        return $OUTPUT->render_from_template($templatename, $data);
     }
 
     /**
@@ -254,9 +243,9 @@ class data_field_harpiainteraction extends data_field_base {
         $paramquery = 'f_' . $this->field->id . '_query';
         $paramanswer = 'f_' . $this->field->id . '_answer';
         $paramhistory = 'f_' . $this->field->id . '_history';
-        $query = optional_param($paramquery, $defaults[$paramquery], PARAM_NOTAGS);
-        $answer = optional_param($paramanswer, $defaults[$paramanswer], PARAM_NOTAGS);
-        $history = optional_param($paramhistory, $defaults[$paramhistory], PARAM_NOTAGS);
+        $query = optional_param($paramquery, $defaults[$paramquery] ?? '', PARAM_NOTAGS);
+        $answer = optional_param($paramanswer, $defaults[$paramanswer] ?? '', PARAM_NOTAGS);
+        $history = optional_param($paramhistory, $defaults[$paramhistory] ?? '', PARAM_NOTAGS);
         if ($query || $answer || $history) {
             return [
                 'query' => $query,
