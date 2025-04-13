@@ -14,9 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace datafield_harpiainteraction\privacy;
+
 use core_privacy\local\request\transform;
 use core_privacy\local\request\writer;
 use mod_data\privacy\datafield_provider;
+
 
 /**
  * HarpIA Interaction. Privacy provider.
@@ -33,11 +36,29 @@ class provider implements datafield_provider, \core_privacy\local\metadata\null_
         return 'privacy:metadata';
     }
 
-    /**
-     * {@inheritdoc}
-     */
+   /**
+    * {@inheritdoc}
+    */
     public static function export_data_content($context, $recordobj, $fieldobj, $contentobj, $defaultvalue) {
-        /* TODO: write this function */
+
+        /* This function is called when the user data is being exported. */
+
+        $dir = __DIR__;
+        require_once("{$dir}/../../field.class.php");
+
+        $colhistory = \data_field_harpiainteraction::COL_HISTORY;
+        $colquery = \data_field_harpiainteraction::COL_QUERY;
+        $colanswer = \data_field_harpiainteraction::COL_ANSWER;
+
+        $defaultvalue->history = json_decode($defaultvalue->$colhistory ?? '[]');
+        $defaultvalue->query = $defaultvalue->$colquery;
+        $defaultvalue->answer = $defaultvalue->$colanswer;
+
+        unset($defaultvalue->$colquery);
+        unset($defaultvalue->$colanswer);
+        unset($defaultvalue->$colhistory);
+
+        writer::with_context($context)->export_data([$recordobj->id, $contentobj->id], $defaultvalue);
     }
 
     /**
