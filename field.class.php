@@ -96,16 +96,12 @@ class data_field_harpiainteraction extends data_field_base {
      */
     private $interactionid = 0;
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function supports_preview(): bool {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function get_data_content_preview(int $recordid): stdClass {
         return (object) [
             'id' => 0,
@@ -119,9 +115,7 @@ class data_field_harpiainteraction extends data_field_base {
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function display_add_field($recordid = 0, $formdata = null) {
         /* This function generates the item in the form shown when the student (evaluator)
          is adding or editing an entry. */
@@ -188,9 +182,7 @@ class data_field_harpiainteraction extends data_field_base {
     }
 
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function display_search_field($value = null) {
         /* This function generates the search fields in the advanced search page. */
         global $OUTPUT;
@@ -205,9 +197,7 @@ class data_field_harpiainteraction extends data_field_base {
         return $OUTPUT->render_from_template($templatename, $data);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function generate_sql($tablealias, $value) {
 
         /* This function generates the SQL conditions in the search. */
@@ -233,9 +223,7 @@ class data_field_harpiainteraction extends data_field_base {
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function parse_search_field($defaults = null) {
 
         // This function parses the user input in the advanced search.
@@ -256,9 +244,7 @@ class data_field_harpiainteraction extends data_field_base {
         return 0;
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function update_content($recordid, $value, $name = '') {
 
         /* This function is called once per FORM FIELD.
@@ -335,9 +321,7 @@ class data_field_harpiainteraction extends data_field_base {
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function display_browse_field($recordid, $template) {
         /* This function generates the summary of the data of this field, displayed on the entry list. */
 
@@ -365,9 +349,7 @@ class data_field_harpiainteraction extends data_field_base {
         return $OUTPUT->render_from_template($templatename, $data);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function export_text_value($record) {
         // This function generates the string representation for the exported
         // spreadsheet.
@@ -381,9 +363,7 @@ class data_field_harpiainteraction extends data_field_base {
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function get_config_for_external() {
         $configs = [];
         for ($i = 1; $i <= 10; $i++) {
@@ -393,9 +373,7 @@ class data_field_harpiainteraction extends data_field_base {
     }
 
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function get_field_params(): array {
         // This function defines the fields that will be available
         // in the Mustache template (shown when the field definition is created/edited

@@ -29,16 +29,12 @@ use mod_data\privacy\datafield_provider;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements datafield_provider, \core_privacy\local\metadata\null_provider {
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public static function get_reason(): string {
         return 'privacy:metadata';
     }
 
-   /**
-    * {@inheritdoc}
-    */
+    #[\Override]
     public static function export_data_content($context, $recordobj, $fieldobj, $contentobj, $defaultvalue) {
 
         /* This function is called when the user data is being exported. */
@@ -61,9 +57,8 @@ class provider implements datafield_provider, \core_privacy\local\metadata\null_
         writer::with_context($context)->export_data([$recordobj->id, $contentobj->id], $defaultvalue);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public static function delete_data_content($context, $recordobj, $fieldobj, $contentobj) {
+        /* Nothing to do here. Data will be deleted when the field tables are deleted. */
     }
 }
