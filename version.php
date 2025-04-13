@@ -20,12 +20,12 @@
  * @package    datafield_harpiainteraction
  * @copyright  2025 C4AI-USP <c4ai@usp.br>
  * @author     Vinícius B. Matos
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2025041201;         // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version = 2025041301;         // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires = 2024100701;        // Requires this Moodle version.
 $plugin->component = 'datafield_harpiainteraction';  // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_ALPHA;

@@ -14,6 +14,46 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
+
+{{!
+    @template datafield_harpiainteraction/harpiainteraction_browse
+
+    Definition of the browsing interface for the `harpiainteraction` field .
+
+    @package    datafield_harpiainteraction
+    @copyright  2025 C4AI-USP <c4ai@usp.br>
+    @author     Vinícius B. Matos
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+   
+    Context variables required for this template:
+    * field_id      integer  ID of the field.
+    * description   string   Field description.
+    * query         string   The user's query.
+    * answer        string   The answer provider's output.
+    * history       array    Previous messages.
+    * continue_url  string   URL to continue the conversation (or an empty string if not allowed).
+
+    Example context (json):
+    {
+        "field_id": 1,
+        "description": "Description for the HarpIA interaction field",
+        "query": "current question",
+        "answer": "current answer",
+        "history": [
+            "first question",
+            "first answer",
+            "second question",
+            "second answer"
+        ],
+        "continue_url": "https://example.com/mod/data/edit.php?d=26&parentrid=110"
+    }
+}}
  
  <div class="harpiainteraction-browse">
     {{#history.0}}

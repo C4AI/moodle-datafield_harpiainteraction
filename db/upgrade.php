@@ -20,7 +20,7 @@
  * @package    datafield_harpiainteraction
  * @copyright  2025 C4AI-USP <c4ai@usp.br>
  * @author     Vinícius B. Matos
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
  /**

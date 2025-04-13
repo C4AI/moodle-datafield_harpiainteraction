@@ -14,6 +14,47 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
+{{!
+    @template datafield_harpiainteraction/harpiainteraction_addfield
+
+    Definition of the instance adding interface for the  `harpiainteraction` field.
+
+    @package    datafield_harpiainteraction
+    @copyright  2025 C4AI-USP <c4ai@usp.br>
+    @author     Vinícius B. Matos
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * field_id        int         ID of the field.
+    * description     string      Field description.
+    * query           string      User query.
+    * answer          string      Answer provider's output.
+    * history         array       Previous messages.
+    * parent_rid      int|string  ID of the parent entry, or an empty string.
+    * interaction_id  int         ID of the interaction with the answer provider.
+
+    Example context (json):
+    {
+        "field_id": 123456,
+        "description": "Description for the HarpIA interaction field",
+        "query": "current question",
+        "answer": "current answer",
+        "history": [
+            "first question",
+            "first answer",
+            "second question",
+            "second answer"
+        ],
+        "parent_rid": 123455,
+        "interaction_id": 42
+    }
+}}
  
 <div
   title="{{ description }}"
