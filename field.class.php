@@ -368,8 +368,6 @@ class data_field_harpiainteraction extends data_field_base {
             ]))->out();
         }
         $data = [
-            'field_id' => $this->field->id,
-            'description' => $this->field->description ?? '',
             'query' => $content->{self::COL_QUERY} ?? '',
             'answer' => $content->{self::COL_ANSWER} ?? '',
             'history' => json_decode($content->{self::COL_HISTORY} ?? '[]') ?? [],
