@@ -13,66 +13,36 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/**
- * Privacy Subsystem implementation for datafield_date.
- *
- * @package    datafield_date
- * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
-namespace datafield_date\privacy;
 use core_privacy\local\request\transform;
 use core_privacy\local\request\writer;
 use mod_data\privacy\datafield_provider;
 
-defined('MOODLE_INTERNAL') || die();
 /**
- * Privacy Subsystem for datafield_date implementing null_provider.
- *
- * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
+ * HarpIA Interaction. Privacy provider.
+ * @package    datafield_harpiainteraction
+ * @copyright  2025 C4AI-USP <c4ai@usp.br>
+ * @author     Vinícius B. Matos
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements
-    \core_privacy\local\metadata\null_provider,
-    datafield_provider
-{
+class provider implements datafield_provider, \core_privacy\local\metadata\null_provider {
     /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
-     *
-     * @return  string
+     * {@inheritdoc}
      */
-    public static function get_reason(): string
-    {
+    public static function get_reason(): string {
         return 'privacy:metadata';
     }
 
     /**
-     * Exports data about one record in {data_content} table.
-     *
-     * @param \context_module $context
-     * @param \stdClass $recordobj record from DB table {data_records}
-     * @param \stdClass $fieldobj record from DB table {data_fields}
-     * @param \stdClass $contentobj record from DB table {data_content}
-     * @param \stdClass $defaultvalue pre-populated default value that most of plugins will use
+     * {@inheritdoc}
      */
-    public static function export_data_content($context, $recordobj, $fieldobj, $contentobj, $defaultvalue)
-    {
-        $defaultvalue->content = transform::date($defaultvalue->content);
-        writer::with_context($context)->export_data([$recordobj->id, $contentobj->id], $defaultvalue);
+    public static function export_data_content($context, $recordobj, $fieldobj, $contentobj, $defaultvalue) {
+        /* TODO: write this function */
     }
 
     /**
-     * Allows plugins to delete locally stored data.
-     *
-     * @param \context_module $context
-     * @param \stdClass $recordobj record from DB table {data_records}
-     * @param \stdClass $fieldobj record from DB table {data_fields}
-     * @param \stdClass $contentobj record from DB table {data_content}
+     * {@inheritdoc}
      */
-    public static function delete_data_content($context, $recordobj, $fieldobj, $contentobj)
-    {
-
+    public static function delete_data_content($context, $recordobj, $fieldobj, $contentobj) {
     }
 }
