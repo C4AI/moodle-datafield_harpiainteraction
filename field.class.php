@@ -280,9 +280,10 @@ class data_field_harpiainteraction extends data_field_base {
 
         global $DB, $USER;
 
+        $interactionid = 0;
         switch ($key) {
             case "interactionid":
-                $this->interaction_id = $value;
+                $interactionid = $value;
                 break;
             default: // No other fields for now - data is obtained from the interaction table.
                 return;
@@ -290,11 +291,11 @@ class data_field_harpiainteraction extends data_field_base {
         $interaction = null;
 
 
-        if ($this->interaction_id) {
+        if ($interactionid) {
             // All form fields have been collected.
             global $DB;
             // Find the interaction.
-            $where = ['id' => $this->interaction_id, 'userid' => $USER->id, 'recordid' => null];
+            $where = ['id' => $interactionid, 'userid' => $USER->id, 'recordid' => null];
             $interaction = $DB->get_record('data_harpiainteraction', $where);
             if (!$interaction) {
                 return false;
@@ -333,7 +334,7 @@ class data_field_harpiainteraction extends data_field_base {
 
             // Link with the interaction.
             $interactiondata = new stdClass();
-            $interactiondata->id = $this->interaction_id;
+            $interactiondata->id = $interactionid;
             $interactiondata->dataid = $this->data->id;
             $interactiondata->recordid = $recordid;
             return $DB->update_record('data_harpiainteraction', $interactiondata);
