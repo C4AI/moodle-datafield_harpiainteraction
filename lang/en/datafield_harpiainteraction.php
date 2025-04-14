@@ -24,6 +24,8 @@
  */
 
 $string['pluginname'] = 'HarpIA Interaction';
+$string['noaccess'] = "You cannot perform this operation.";
+
 $string['fieldtypelabel'] = 'HarpIA - Interaction with Language Model';
 $string['query'] = 'Query:';
 $string['answer'] = 'Answer:';

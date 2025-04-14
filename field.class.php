@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+use mod_data\manager;
+
 /**
  * HarpIA Interaction. Class that defines the field's behaviour.
  *
@@ -146,12 +148,29 @@ class data_field_harpiainteraction extends data_field_base {
             // If it has a parent record, fetch its history.
             if ($parentrid) {
                 $where = ['fieldid' => $this->field->id, 'recordid' => $parentrid];
-                $parentrecord = $DB->get_record('data_content', $where);
+                $parentcontent = $DB->get_record('data_content', $where);
+                if (!$parentcontent) {
+                    throw new invalid_parameter_exception('Invalid parent rid');
+                }
+
+                // Make sure that the user can see the parent record.
+                $manager = manager::create_from_instance($this->data);
+                $context = $manager->get_context();
+                $cm = $manager->get_coursemodule();
+                $currentgroup = groups_get_activity_group($cm);
+                $prevrecord = $DB->get_record('data_records', ['id' => $parentrid]);
+                $canmanageentries = has_capability('mod/data:manageentries', $context);
+                if (!data_can_view_record($this->data, $prevrecord, $currentgroup, $canmanageentries)) {
+                    // If the user cannot see a previous interaction, they cannot continue the conversation.
+                    throw new \moodle_exception('noaccess', 'datafield_harpiainteraction');
+                }
+
+                // Include the past history and the last interaction.
                 $history = array_merge(
-                    json_decode($parentrecord->{self::COL_HISTORY} ?: '[]'),
+                    json_decode($parentcontent->{self::COL_HISTORY} ?: '[]'),
                     [
-                        $parentrecord->{self::COL_QUERY},
-                        $parentrecord->{self::COL_ANSWER},
+                        $parentcontent->{self::COL_QUERY},
+                        $parentcontent->{self::COL_ANSWER},
                     ]
                 );
             }
