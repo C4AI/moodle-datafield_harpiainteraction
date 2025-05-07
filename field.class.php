@@ -164,6 +164,10 @@ class data_field_harpiainteraction extends data_field_base {
                     // If the user cannot see a previous interaction, they cannot continue the conversation.
                     throw new \moodle_exception('noaccess', 'datafield_harpiainteraction');
                 }
+                if ($this->field->{self::COL_EXP_TYPE} !== 'chat') {
+                    // If an experiment type only allows single interactions, do not allow continuation.
+                    throw new \moodle_exception('nochat', 'datafield_harpiainteraction');
+                }
 
                 // Include the past history and the last interaction.
                 $history = array_merge(

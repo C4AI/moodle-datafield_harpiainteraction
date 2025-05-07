@@ -25,6 +25,8 @@
 
 $string['pluginname'] = 'HarpIA Interaction';
 $string['noaccess'] = "You cannot perform this operation.";
+$string['nochat'] = "This experiment does not allow follow-up interactions.";
+
 
 $string['fieldtypelabel'] = 'HarpIA - Interaction with Language Model';
 $string['query'] = 'Query:';
