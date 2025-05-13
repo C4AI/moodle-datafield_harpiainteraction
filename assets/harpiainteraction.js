@@ -10,11 +10,13 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
       const outer = btn.closest(".form-inline")[0];
       const fieldId = outer.getAttribute("data-field-id");
       const field = $(outer).find(".harpiainteraction-field")[0];
+      const errorMsg = $(outer).find('.errorbox');
 
       const parentRIdElem = $(outer).find(".parentrid");
       const parentRId = parentRIdElem.length ? parentRIdElem[0].value : null;
 
       btn.hide();
+      errorMsg.hide();
       $(field).prop("readonly", true);
 
       ajax
@@ -48,8 +50,9 @@ require(["core/first", "jquery", "jqueryui", "core/ajax"], function (
           return;
         })
         .fail(function (err) {
-          console.log(err);
           btn.show();
+          errorMsg[0].innerText = err.message;
+          errorMsg.show();
           $(field).prop("readonly", false);
           return;
         });
