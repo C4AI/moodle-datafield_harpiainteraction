@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 use mod_data\manager;
+use local_harpiaajax\local\send_message;
 
 /**
  * HarpIA Interaction. Class that defines the field's behaviour.
@@ -411,7 +412,6 @@ class data_field_harpiainteraction extends data_field_base {
         $data = parent::get_field_params();
 
         // Get list of answer providers from HarpIA Ajax plugin.
-        require_once($CFG->dirroot . '/local/harpiaajax/send_message.php');
         $providers = send_message::fetch_providers()->providers;
 
         $unavailableprovider = '';
