@@ -132,7 +132,7 @@ class data_field_harpiainteraction extends data_field_base {
         $history = [];
         $query = '';
         $answer = '';
-        $parentrid = $_GET['parentrid'] ?? null;
+        $parentrid = optional_param('parentrid', null, PARAM_INT);
 
         if ($recordid) { // Editing an existing record.
             // Retrieve data from the record.
