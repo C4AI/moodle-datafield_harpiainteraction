@@ -410,6 +410,11 @@ class data_field_harpiainteraction extends data_field_base {
         require_once($CFG->dirroot . '/local/harpiaajax/send_message.php');
         $providers = send_message::fetch_providers()->providers;
 
+        $unavailableprovider = '';
+        if (!in_array($data[self::COL_PROVIDER], array_column($providers, 'name'))) {
+            $unavailableprovider = $data[self::COL_PROVIDER];
+        }
+
         return [
             "name" => $data["name"],
             "description" => $data["description"],
@@ -420,6 +425,7 @@ class data_field_harpiainteraction extends data_field_base {
             "system_prompt_col" => self::COL_SYSTEM_PROMPT,
             "system_prompt" => $data[self::COL_SYSTEM_PROMPT],
             "providers" => $providers,
+            "unavailable_answer_provider" => $unavailableprovider,
         ];
     }
 }

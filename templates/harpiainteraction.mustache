@@ -67,7 +67,7 @@
         <div class="col-md-9 form-inline align-items-start felement">
             
             {{#providers.0}}
-                <select class="form-control" name="{{answer_provider_col}}" id="{{ uniqid }}-provider-name-input" data-initial-value="{{answer_provider}}">
+                <select class="form-control" name="{{answer_provider_col}}" id="{{ uniqid }}-provider-name-input" data-initial-value="{{answer_provider}}" required>
                 <option value="" id="{{ uniqid }}-provider-name-nooption"></option>
                 {{#providers}}
                     <option value="{{name}}" data-initial-value="{{answer_provider}}"
@@ -77,6 +77,13 @@
                     </option>
                 {{/providers}}
                 </select>
+                
+                {{#unavailable_answer_provider}}
+                    <div class="errorbox alert alert-danger">
+                        {{#str}}unavailableanswerprovider, datafield_harpiainteraction, {{ unavailable_answer_provider }}{{/str}}</div>
+                    </div>
+                {{/unavailable_answer_provider}}
+                
             {{/providers.0}}
             
             {{^providers}}
@@ -147,9 +154,15 @@
                 systemPromptRow.classList.remove('hidden');
             }
         });
-        answerProviders.value = answerProviders.getAttribute("data-initial-value");
+        const initialValue = answerProviders.getAttribute("data-initial-value");
+        answerProviders.value = initialValue;
         answerProviders.dispatchEvent(new Event("change"));
-        document.getElementById("{{ uniqid }}-provider-name-nooption").remove();
+        const placeholder = document.getElementById("{{ uniqid }}-provider-name-nooption");
+        if (initialValue && answerProviders.value === initialValue) {
+            placeholder.remove();
+        } else {
+            placeholder.setAttribute('disabled', '');
+        }
     }
     
     expTypeSelect.value = expTypeSelect.getAttribute("data-initial-value");

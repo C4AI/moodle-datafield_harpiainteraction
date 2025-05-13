@@ -27,7 +27,6 @@ $string['pluginname'] = 'HarpIA Interaction';
 $string['noaccess'] = "You cannot perform this operation.";
 $string['nochat'] = "This experiment does not allow follow-up interactions.";
 
-
 $string['fieldtypelabel'] = 'HarpIA - Interaction with Language Model';
 $string['query'] = 'Query:';
 $string['answer'] = 'Answer:';
@@ -43,5 +42,6 @@ $string['experimenttype_single'] = 'Single interaction';
 $string['experimenttype_chat'] = 'Chat interaction';
 $string['systemprompt'] = 'System prompt';
 $string['cantfetchproviders'] = 'Failed to fetch the list of answer providers. An administrator must check the HarpIA Ajax settings.';
+$string['unavailableanswerprovider'] = 'The answer provider "{$a}" is not available.';
 
 $string['privacy:metadata'] = 'The HarpIA field component doesn\'t store any personal data; it uses tables defined in mod_data.';
