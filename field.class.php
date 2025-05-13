@@ -297,7 +297,7 @@ class data_field_harpiainteraction extends data_field_base {
 
         if ($interactionid) {
             // All form fields have been collected.
-            global $DB;
+            global $DB, $USER;
             // Find the interaction.
             $where = ['id' => $interactionid, 'userid' => $USER->id, 'recordid' => null];
             $interaction = $DB->get_record('data_harpiainteraction', $where);
@@ -322,6 +322,8 @@ class data_field_harpiainteraction extends data_field_base {
             $content->{self::COL_QUERY} = $this->query;
             $content->{self::COL_ANSWER} = $this->answer;
             $content->{self::COL_HISTORY} = json_encode($this->history ?: []);
+            $now = time();
+
             if ($oldcontent = $DB->get_record('data_content', ['fieldid' => $this->field->id, 'recordid' => $recordid])) {
                 // Updating an existing row.
                 // This is called even for new entries, because Moodle creates the row with NULL values.
@@ -341,6 +343,8 @@ class data_field_harpiainteraction extends data_field_base {
             $interactiondata->id = $interactionid;
             $interactiondata->dataid = $this->data->id;
             $interactiondata->recordid = $recordid;
+            $interactiondata->usermodified = $USER->id;
+            $interactiondata->timemodified = time();
             return $DB->update_record('data_harpiainteraction', $interactiondata);
         }
     }

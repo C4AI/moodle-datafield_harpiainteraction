@@ -52,6 +52,9 @@ function xmldb_datafield_harpiainteraction_upgrade($oldversion) {
         $table->add_field('query', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
         $table->add_field('system_prompt', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_field('answer', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
         // Adding keys to table data_harpiainteraction.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
@@ -59,6 +62,7 @@ function xmldb_datafield_harpiainteraction_upgrade($oldversion) {
         $table->add_key('recordid-', XMLDB_KEY_FOREIGN, ['recordid'], 'data_records', ['id']);
         $table->add_key('parentrecordid-', XMLDB_KEY_FOREIGN, ['parentrecordid'], 'data_records', ['id']);
         $table->add_key('userid-', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
 
         // Conditionally launch create table for data_harpiainteraction.
         if (!$dbman->table_exists($table)) {
