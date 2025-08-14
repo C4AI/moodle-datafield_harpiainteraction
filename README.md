@@ -27,7 +27,11 @@ based on its output.
 - [HarpIA Ajax](../../../moodle-local_harpiaajax) plugin.
 
 
+## License
 
+Following Moodle's license,
+HarpIA Interaction is provided freely as open source software,
+under version 3 of the GNU General Public License.
 
 ## Copyright
 
